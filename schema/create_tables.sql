@@ -1,7 +1,6 @@
 CREATE DATABASE IF NOT EXISTS fincore;
 USE fincore;
 
--- Drop dependent tables first
 DROP TABLE IF EXISTS cards;
 DROP TABLE IF EXISTS beneficiaries;
 DROP TABLE IF EXISTS loan_payments;
@@ -12,7 +11,7 @@ DROP TABLE IF EXISTS employees;
 DROP TABLE IF EXISTS customers;
 DROP TABLE IF EXISTS branches;
 
--- 1. branches (Independent)
+-- 1. branches (1 UNIQUE)
 CREATE TABLE branches (
     branch_id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) NOT NULL,
@@ -21,7 +20,7 @@ CREATE TABLE branches (
     CONSTRAINT uq_branches_ifsc UNIQUE (ifsc_code)
 );
 
--- 2. customers (Independent)
+-- 2. customers (2 UNIQUE)
 CREATE TABLE customers (
     customer_id INT PRIMARY KEY AUTO_INCREMENT,
     full_name VARCHAR(100) NOT NULL,
@@ -33,7 +32,7 @@ CREATE TABLE customers (
     CONSTRAINT uq_customers_email UNIQUE (email)
 );
 
--- 3. employees (Manager hierarchy)
+-- 3. employees (2 FKs)
 CREATE TABLE employees (
     employee_id INT PRIMARY KEY AUTO_INCREMENT,
     full_name VARCHAR(100) NOT NULL,
@@ -45,7 +44,7 @@ CREATE TABLE employees (
     CONSTRAINT fk_emp_manager FOREIGN KEY (manager_id) REFERENCES employees(employee_id) ON DELETE SET NULL ON UPDATE CASCADE
 );
 
--- 4. accounts (Core Operational Hub)
+-- 4. accounts (1 UNIQUE, 2 FKs, 1 CHECK)
 CREATE TABLE accounts (
     account_id INT PRIMARY KEY AUTO_INCREMENT,
     account_number VARCHAR(20) NOT NULL,
@@ -60,7 +59,7 @@ CREATE TABLE accounts (
     CONSTRAINT chk_accounts_balance CHECK (balance >= 0.00)
 );
 
--- 5. transactions (Ledger with paired transfer_ref)
+-- 5. transactions (1 FK, 2 CHECKs)
 CREATE TABLE transactions (
     txn_id INT PRIMARY KEY AUTO_INCREMENT,
     account_id INT NOT NULL,
@@ -76,7 +75,7 @@ CREATE TABLE transactions (
     )
 );
 
--- 6. loans (Lending)
+-- 6. loans (2 FKs, 4 CHECKs)
 CREATE TABLE loans (
     loan_id INT PRIMARY KEY AUTO_INCREMENT,
     customer_id INT NOT NULL,
@@ -90,10 +89,11 @@ CREATE TABLE loans (
     CONSTRAINT fk_loans_branch FOREIGN KEY (branch_id) REFERENCES branches(branch_id) ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT chk_loans_principal CHECK (principal > 0.00),
     CONSTRAINT chk_loans_rate CHECK (interest_rate >= 0.00 AND interest_rate <= 100.00),
-    CONSTRAINT chk_loans_tenure CHECK (tenure_months >= 1 AND tenure_months <= 360)
+    CONSTRAINT chk_loans_tenure CHECK (tenure_months >= 1 AND tenure_months <= 360),
+    CONSTRAINT chk_loans_status CHECK (status IN ('active', 'closed', 'defaulted'))
 );
 
--- 7. loan_payments (EMI Instalments)
+-- 7. loan_payments (1 UNIQUE, 1 FK, 2 CHECKs)
 CREATE TABLE loan_payments (
     payment_id INT PRIMARY KEY AUTO_INCREMENT,
     loan_id INT NOT NULL,
@@ -107,7 +107,7 @@ CREATE TABLE loan_payments (
     CONSTRAINT chk_payment_dates CHECK (paid_date IS NULL OR paid_date >= due_date)
 );
 
--- 8. beneficiaries (Payees)
+-- 8. beneficiaries (1 UNIQUE, 1 FK)
 CREATE TABLE beneficiaries (
     beneficiary_id INT PRIMARY KEY AUTO_INCREMENT,
     customer_id INT NOT NULL,
@@ -119,7 +119,7 @@ CREATE TABLE beneficiaries (
     CONSTRAINT fk_ben_customer FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- 9. cards (Card credentials)
+-- 9. cards (1 UNIQUE, 1 FK, 1 CHECK)
 CREATE TABLE cards (
     card_id INT PRIMARY KEY AUTO_INCREMENT,
     account_id INT NOT NULL,
@@ -133,7 +133,7 @@ CREATE TABLE cards (
     CONSTRAINT chk_cards_number CHECK (card_number REGEXP '^[0-9]{16}$')
 );
 
--- Supporting indexes
+-- 4 Secondary Indexes
 CREATE INDEX idx_accounts_customer ON accounts(customer_id);
 CREATE INDEX idx_transactions_account ON transactions(account_id);
 CREATE INDEX idx_transactions_ref ON transactions(transfer_ref);

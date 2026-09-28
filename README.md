@@ -527,6 +527,9 @@ We didn't leave checking to the end — these are the checks that were actually 
 | **Siva** | Database implementation | bringing the DDL up on MySQL, verification runs |
 | **Jashan** | SQL queries | the business query set (§13 shows the schema's side of it) |
 | **Harsita** | Seed data | the demo dataset (in progress) |
+| **Thammiksha** | read me  |
+
+
 
 *Note from Aryan:* the schema and every document in `docs/` are my work, and the mistakes v1 contained were mine too — which is why the v2 corrections are written down where they happened instead of being quietly patched. Amruta's review pass is what caught them; that's exactly what review is for.
 

@@ -24,7 +24,7 @@ FinCore is a MySQL database for a small retail bank: branches and the staff who 
 
 We built it following two simple rules:
 
-- **If MySQL can enforce a rule, the rule goes in the database.** 35 named constraints in the DDL — CHECKs, foreign keys, UNIQUE keys — not checks in application code that somebody could forget to call.
+- **If MySQL can enforce a rule, the rule goes in the database.** 34 named constraints in the DDL — CHECKs, foreign keys, UNIQUE keys — not checks in application code that somebody could forget to call.
 - **Write down every decision, including the ones we rejected.** The docs in this repo explain why the schema looks the way it does, so a reader can check our reasoning instead of taking our word for it.
 
 All nine tables are in BCNF, and the full working (not just the verdict) is in [`docs/NORMALIZATION.md`](docs/NORMALIZATION.md).
@@ -80,7 +80,7 @@ The system models one small bank end-to-end. On the **master-data** side sit `br
 
 Before drawing a single box, we fixed five ground rules and stuck to them. They explain most of what follows:
 
-1. **Rules go in the database where possible.** Negative balances, zero-amount movements, self-managing employees and malformed card numbers are rejected by CHECK constraints and ENUMs — not by app code that somebody could bypass.
+1. **Rules go in the database where possible.** Negative balances, zero-amount movements, self-managing employees and malformed card numbers are rejected by CHECK constraints, triggers and ENUMs — not by app code that somebody could bypass.
 2. **Don't delete history.** Deleting anything with financial history attached is blocked by the referential actions in [§8](#8--the-ten-relationships).
 3. **Don't store what you can derive.** There is no `is_overdue`, no `age`, no `outstanding_amount` column anywhere — truths that change with the calendar are computed at query time, so the data can never contradict itself.
 4. **Money is exact.** `DECIMAL(12,2)` everywhere, never `FLOAT`, because binary fractions cannot represent ten paise exactly.
@@ -190,8 +190,9 @@ If you want to check a single column's definition without opening the DDL, this 
 FinCore/
 ├── README.md                        ← you are here
 ├── schema/
-│   └── create_tables.sql            DDL v2 — 9 tables, 35 named constraints,
-│                                    3 secondary indexes; idempotent (re-runnable)
+│   ├── create_tables.sql            DDL v2.1 — 9 tables, 34 named constraints,
+│   │                                3 secondary indexes; idempotent (re-runnable)
+│   └── insert_datav1.1_fixed.sql    seed/demo data — 3,242 rows, deterministic
 ├── docs/
 │   ├── DATABASE_DESIGN.md           the main write-up: goals, relationships,
 │   │                                decisions D1–D6 with rejected alternatives,
@@ -221,7 +222,7 @@ The three docs cross-reference each other instead of repeating themselves: the d
 | Columns | 57 |
 | Primary keys | 9 — all surrogate `AUTO_INCREMENT` integers (decision D1) |
 | Foreign keys | 10 — **6 RESTRICT · 3 CASCADE · 1 SET NULL** (all `ON UPDATE CASCADE`) |
-| CHECK constraints | 9 — violations fail with MySQL error **3819** |
+| CHECK constraints | 8 — violations fail with MySQL error **3819** (the self-manager rule is a trigger, error **1644**) |
 | UNIQUE keys | 7 — 5 single-column, 2 composite |
 | ENUM domains | 7 — frozen business vocabularies (account type, txn type, …) |
 | Secondary indexes | 3 — `idx_txn_date`, `idx_loan_status`, `idx_payment_due` |
@@ -239,7 +240,7 @@ The nine tables, what one row in each means, and the keys that govern it:
 | `transactions` | one money movement, append-only | PK `txn_id` · FK → accounts (RESTRICT) · `amount > 0` and transfer-pairing (CHECKs) |
 | `loans` | one sanctioned loan | PK `loan_id` · FKs → customers, branches · principal/rate/tenure bounds (CHECKs) |
 | `loan_payments` | one scheduled EMI of one loan | PK `payment_id` · UNIQUE `(loan_id, instalment_no)` · FK → loans (CASCADE) |
-| `employees` | one staff member | PK `employee_id` · FKs → branches, **employees (self, SET NULL)** · nobody manages themselves (CHECK) |
+| `employees` | one staff member | PK `employee_id` · FKs → branches, **employees (self, SET NULL)** · nobody manages themselves (trigger) |
 | `beneficiaries` | one payee registered by a customer | PK `beneficiary_id` · UNIQUE `(customer_id, account_no, ifsc_code)` · deliberately **no** FK on the payee account (D3) |
 | `cards` | one card issued on an account | PK `card_id` · UNIQUE `card_number` · FK → accounts (CASCADE) · 16-digit format (CHECK) |
 
@@ -340,7 +341,7 @@ FROM information_schema.COLUMNS
 WHERE TABLE_SCHEMA = 'fincore';
 
 SELECT CONSTRAINT_TYPE, COUNT(*) AS count   -- PRIMARY KEY 9 · FOREIGN KEY 10
-FROM information_schema.TABLE_CONSTRAINTS   -- UNIQUE 7 · CHECK 9   (total 35)
+FROM information_schema.TABLE_CONSTRAINTS   -- UNIQUE 7 · CHECK 8   (total 34)
 WHERE TABLE_SCHEMA = 'fincore'
 GROUP BY CONSTRAINT_TYPE;
 
@@ -383,7 +384,7 @@ Now the negative tests — each statement should **fail** with exactly the error
 | 5 | `DELETE FROM accounts WHERE account_id = 1;` — the account has history | `fk_txn_account` (RESTRICT) | **1451** |
 | 6 | `INSERT INTO customers (full_name, dob, phone, email, address) VALUES ('Second Meera', '1990-01-01', '9800000000', 'meera.nair@example.com', 'Elsewhere');` — duplicate email | `uq_customers_email` | **1062** |
 | 7 | `INSERT INTO accounts (account_number, customer_id, branch_id, account_type, opened_on) VALUES ('ACC10000002', 1, 1, 'saving', '2026-01-11');` — ENUM typo (`'saving'`) | `account_type` ENUM | **1265** |
-| 8 | `UPDATE employees SET manager_id = employee_id WHERE employee_id = 1;` — self-management | `chk_emp_not_own_manager` | **3819** |
+| 8 | `UPDATE employees SET manager_id = employee_id WHERE employee_id = 1;` — self-management | `trigger trg_emp_not_own_manager_upd` | **1644** |
 | 9 | `INSERT INTO cards (account_id, card_number, card_type, expiry_date, issued_on) VALUES (1, '12345678ABCD2345', 'debit', '2029-12-31', '2026-01-15');` — letters in a PAN | `chk_cards_number` | **3819** |
 
 > ⚠️ Diagnostics tip: if a "negative test" **succeeds** instead of failing, you're almost certainly on a pre-8.0.16 server where CHECKs are silently ignored — check `SELECT VERSION();` again. All tests assume the default `STRICT_TRANS_TABLES` sql_mode, which is MySQL 8's factory default.
@@ -495,7 +496,7 @@ The full query-to-design-feature map is in the data dictionary §15.
 We didn't leave checking to the end — these are the checks that were actually run:
 
 - **DDL executed and probed** — the script runs clean; every CHECK/FK rule was deliberately violated to confirm the engine rejects it (the §12 table is that suite, distilled).
-- **Counts cross-checked** — 9 tables · 57 columns · 10 FK · 9 CHECK · 7 UNIQUE · 3 indexes, read back from `information_schema` ([§11](#11--running-it) queries) and reconciled against every document that states them.
+- **Counts cross-checked** — 9 tables · 57 columns · 10 FK · 8 CHECK · 7 UNIQUE · 3 indexes, read back from `information_schema` ([§11](#11--running-it) queries) and reconciled against every document that states them.
 - **Diagram ⇔ dictionary ⇔ DDL** — the 9 table cards on the schema diagrams, the 9 sections of the dictionary and the 9 `CREATE TABLE` statements are three views of the same inventory; each pair was checked against the other.
 - **`beneficiaries` has exactly one FK** — the "missing" second one is decision D3, verified as deliberate, not an oversight.
 - **No `FLOAT`/`DOUBLE` anywhere** in the DDL; every money column is `DECIMAL`.
@@ -514,7 +515,7 @@ We didn't leave checking to the end — these are the checks that were actually 
 
 **Deliberately outside scope (for now):** seed/demo data (a separate work package — Harsita), the application layer, stored procedures and triggers, and access control.
 
-**Known limitations, all deliberate and documented where they apply:** no joint accounts (an `account_holders` junction would be the M:N upgrade path); `dob` can't be CHECK-constrained to the past because MySQL forbids non-deterministic functions in CHECK (application-layer responsibility, noted in the DDL); card PANs are stored in plaintext in this demo — production would store a hash plus last four; the *atomicity* of a transfer's two inserts is an insert-routine responsibility, with the §13 reconciliation query as the after-the-fact guard; `accounts.balance` is stored rather than derived (documented deviation, §10).
+**Known limitations, all deliberate and documented where they apply:** no joint accounts (an `account_holders` junction would be the M:N upgrade path); `dob` can't be CHECK-constrained to the past because MySQL forbids non-deterministic functions in CHECK (application-layer responsibility, noted in the DDL); card PANs are stored in plaintext in this demo — production would store a hash plus last four; the *atomicity* of a transfer's two inserts is an insert-routine responsibility, with the §13 reconciliation query as the after-the-fact guard; `accounts.balance` is stored rather than derived (documented deviation, §10) the self-manager rule is enforced by triggers, which stop a row from managing itself but do not detect longer loops (A→B→A)..
 
 **Next steps, in the order we'd do them:** seed data and the full demo query set; views (`v_overdue`, `v_account_statement`); a stored procedure `sp_transfer` that inserts both halves of a transfer in one transaction; audit triggers; date-based partitioning for `transactions`; role-based access (teller vs loan officer vs auditor).
 

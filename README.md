@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🏦 FinCore
+# 🏦 FinCore hihi
 
 **Banking & Transaction Management Database**
 
@@ -520,13 +520,14 @@ We didn't leave checking to the end — these are the checks that were actually 
 
 ## 16. 👥 Team and contributions
 
-| Member | Role | Artifacts in this repository |
-|---|---|---|
-| **Aryan Rao** (AU25UG-006) | Database design, normalization, DDL, documentation, verification | `schema/create_tables.sql`, all `docs/`, all diagrams, this README |
-| **Amruta Nagavi** | Design review | the cross-check pass that produced DDL v2 ([§14](#14--how-the-design-was-verified)) |
-| **Siva** | Database implementation | bringing the DDL up on MySQL, verification runs |
-| **Jashan** | SQL queries | the business query set (§13 shows the schema's side of it) |
-| **Harsita** | Seed data | the demo dataset (in progress) |
+| Member | Role |
+|---|---|
+| **Aryan Rao** | ER diagram, normalization, database design, constraints, Tasks 8, 9 & 10 |
+| **Amruta Nagavi** | Verification, report, README, Task 5 |
+| **Ganga Siva Kumar Reddy** | Database creation, Task 4 |
+| **Harsita** | Sample data, Task 1 |
+| **Elluri Thammiksha** | Tasks 2 & 7, README, report, 10 test cases |
+| **Jashan S** | Tasks 3 & 6, GitHub repository, README, 10 test cases |
 
 *Note from Aryan:* the schema and every document in `docs/` are my work, and the mistakes v1 contained were mine too — which is why the v2 corrections are written down where they happened instead of being quietly patched. Amruta's review pass is what caught them; that's exactly what review is for.
 

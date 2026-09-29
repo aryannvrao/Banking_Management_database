@@ -60,16 +60,16 @@ All nine tables are in BCNF, and the full working (not just the verdict) is in [
 ## 1. 📌 Project status
 
 Keeping this near the top so it's easy to see where things stand. The design side is complete and cross-checked; the remaining items are the parts that need sample data and the full query set.
-
 | Part | Owner | Status |
 |---|---|---|
-| Schema design + DDL ([`schema/create_tables.sql`](schema/create_tables.sql)) | Aryan | ✅ done |
+| Schema design + DDL  — [`schema/create_tables.sql`](schema/create_tables.sql) | Aryan | ✅ done |
 | Design docs — [design write-up](docs/DATABASE_DESIGN.md), [normalization proof](docs/NORMALIZATION.md), [data dictionary](docs/DATA_DICTIONARY.md) | Aryan | ✅ done |
 | Diagrams (6, in [`diagrams/`](diagrams)) | Aryan | ✅ done |
-| Design review pass (produced DDL v2 — see [§14](#14--how-the-design-was-verified)) | Amruta | ✅ done |
-| Bringing the DDL up on MySQL + verification runs | Siva | ⏳ in progress |
-| Business query set (queries for Q1–Q7) | Jashan | ⏳ in progress |
-| Seed / demo data | Harsita | ⏳ in progress |
+| Design review pass (Q5) — produced DDL v2, see [§14](#14--how-the-design-was-verified) | Amruta | ✅ done |
+| Bringing the DDL up on MySQL + verification runs (Q4) | Siva | ⏳ in progress |
+| Business query set (Q3 and Q6) test cases | Jashan | ⏳ in progress |
+| Business query set (Q2 and Q7), final project report, SQL test cases + README update | Thammiksha | ✅ done |
+| Seed / demo data (Q1) | Harsita | ⏳ in progress |
 | Final README + docs update | everyone | 📋 after the above |
 
 Once the three ⏳ rows are done, this table (and the rest of this README) gets one final update and the status badge at the top flips to *complete*.

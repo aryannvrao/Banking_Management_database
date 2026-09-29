@@ -1,6 +1,6 @@
 -- ============================================================================
 --  FinCore - Seed / Demo Data
---  File    : Schema/data/insert_data.sql
+--  File    : data/insert_data.sql
 --  Target  : MySQL 8.0.16+ · schema/create_tables.sql v2.1
 --  Owner   : Harsita (AU25UG-019)
 --

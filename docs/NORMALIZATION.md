@@ -1,7 +1,8 @@
 # FinCore — Normalization: From One Broken Table to BCNF
 
 > Companion to [`DATABASE_DESIGN.md`](./DATABASE_DESIGN.md) · verified against
-> [`schema/create_tables.sql`](../schema/create_tables.sql) (DDL v2)
+> [`schema/create_tables.sql`](../schema/create_tables.sql) (DDL v2.1)
+> · executed as SQL in [`queries/normalization_proof.sql`](../queries/normalization_proof.sql) (§9)
 > **Aryan Rao (AU25UG-006)** · cross-checked by **Amruta Nagavi** · Team 3, DBMS Project, Atria University
 
 The design page (§6) gives the verdict — *all nine tables are in BCNF* — but a verdict
@@ -163,7 +164,9 @@ and the schema came out simpler than the sketch.
 ## 5 · The proof — all nine relations, FD by FD
 
 "→ all" below means "→ every non-key attribute of that relation" (full column lists live
-in [`DATA_DICTIONARY.md`](./DATA_DICTIONARY.md)).
+in [`DATA_DICTIONARY.md`](./DATA_DICTIONARY.md)). Every claim in this table is also
+**executed** against the seeded database — the queries and their results are in
+[§9](#9--the-proof-executed--sql-and-results).
 
 | Relation | Candidate key(s) | Non-trivial FDs | BCNF |
 |---|---|---|---|
@@ -255,3 +258,129 @@ engineering decision.
 constraint, this file must be regenerated together with `DATABASE_DESIGN.md` §2/§6,
 `DATA_DICTIONARY.md` and the schema diagrams — the proof and the schema cannot be allowed
 to disagree, even briefly.
+
+## 9 · The proof, executed — SQL and results
+
+Sections 1–8 prove the normal forms by hand. But this document's own first paragraph
+sets the standard — *a verdict without working shown is just a claim* — and the same
+standard applies to the proof itself. So the proof is also **executed**: eleven plain
+SELECTs, one per claim, run against the database as loaded by
+[`schema/create_tables.sql`](../schema/create_tables.sql) (DDL v2.1) and
+[`data/insert_data.sql`](../data/insert_data.sql) (seed v1.1). The script is
+[`queries/normalization_proof.sql`](../queries/normalization_proof.sql) — every query
+carries its expected result in a comment — and the eleven screenshots below show that
+output. The seed is deterministic (no `RAND()` anywhere), so a fresh run reproduces
+every number exactly.
+
+How to run it yourself:
+
+```bash
+mysql -u root -p < schema/create_tables.sql
+mysql -u root -p < data/insert_data.sql
+mysql -u root -p < queries/normalization_proof.sql
+```
+
+### 9.1 · First normal form
+
+**Atomic domains (N1).** No attribute anywhere holds a set or a structure: of the 57
+columns, zero are `SET` (multi-valued) or `JSON` (structured) types. Every value is a
+single scalar — the schema-level half of 1NF, read straight from `information_schema`.
+
+![N1: 57 columns, 0 non-atomic](screenshots/01_1nf_atomic_domains.png)
+
+**No repeating groups (N2).** The other half of 1NF is the absence of the
+`emi1_due, emi2_due, …` column pattern that §3.1 started from. Loan 1's schedule is
+six *rows*, not twelve columns — any tenure is just more rows.
+
+![N2: loan 1's schedule, one instalment per row](screenshots/02_1nf_no_repeating_groups.png)
+
+### 9.2 · Second normal form
+
+**Single-column primary keys (N3).** 2NF violations require a non-key column
+dependent on *part* of a composite key. Decision D1 (surrogate keys) means no primary
+key is composite — the inventory confirms all nine are single-column, so 2NF holds by
+construction.
+
+![N3: all 9 PKs single-column](screenshots/03_2nf_single_column_pks.png)
+
+**The composite candidate keys, tested anyway (N4, N5).** By construction is not the
+same as checked, so the two relations that *do* have composite candidate keys were
+tested on the data. For `loan_payments (loan_id, instalment_no)`: if `due_date` were
+determined by either half of the key alone, some group would collapse to one date —
+zero groups do. For `beneficiaries (customer_id, account_no, ifsc_code)`: if the payee
+name were a fact about `customer_id` alone, some customer's payees would all share one
+name — no customer's do.
+
+![N4: neither half of loan_payments' key determines the schedule](screenshots/04_2nf_composite_key_loan_payments.png)
+
+![N5: no customer's payees collapse to one name](screenshots/05_2nf_composite_key_beneficiaries.png)
+
+### 9.3 · Third normal form
+
+**One home per fact (N6).** A 3NF violation hides a parent's fact inside a child row
+(`branch_city` inside `accounts` was §3.3's example). The scan shows where branch
+facts may live: a branch's `city` exists in `branches` and nowhere else.
+(`beneficiaries.ifsc_code` is the *payee's own bank* — an outside-bank fact by design
+D3, not a copy of any FinCore branch row.)
+
+![N6: city lives in branches only](screenshots/06_3nf_one_home_per_fact.png)
+
+**The update anomaly, measured (N7).** Twelve accounts and eight loans depend on
+branch 1, yet its city is stored in exactly **one** row: relocating the branch is a
+one-row `UPDATE`. In the §1 `lending_flat` table the same relocation meant editing
+every loan row — and one missed edit left the database claiming one branch in two
+cities. The anomaly is not avoided by discipline here; it is structurally impossible.
+
+![N7: 1 row stores the fact, 20 rows merely reference it](screenshots/07_3nf_update_anomaly_arithmetic.png)
+
+**Would-be transitive dependencies, refuted (N8).** 3NF needs a non-key column
+determining another non-key column. The two candidates that could plausibly look
+determining were tested on the data: `designation` does **not** determine an
+employee's branch (every designation spans 50 branches), and `account_type`
+determines neither the customer nor the branch (every type spans dozens of each).
+Both refuted — no non-key → non-key dependency exists.
+
+![N8: designation and account_type determine nothing](screenshots/08_3nf_transitive_candidates_refuted.png)
+
+### 9.4 · Boyce–Codd normal form
+
+**Every determinant is an enforced key (N9).** The BCNF test is *every non-trivial
+determinant must be a candidate key*. This is the engine's own inventory of those
+keys — 9 primary keys + 7 UNIQUE keys, exactly the candidate keys listed in the §5
+proof table. §5 note 1 said the FDs and the constraints are the same statement in two
+languages; this is that sentence, executed.
+
+![N9: the 16 enforced candidate keys](screenshots/09_bcnf_candidate_key_inventory.png)
+
+**The FDs hold in the data (N10).** Each determinant from §5 — `ifsc_code`,
+`phone`, `email`, `account_number`, `card_number`, the two composite keys — verified
+against the loaded rows: zero duplicate groups across all seven. Each determinant
+identifies exactly one row, which is precisely what X → rest-of-row means.
+
+![N10: 7 determinants, 0 violations](screenshots/10_bcnf_fds_hold_in_data.png)
+
+**"Looks unique" is not a determinant (N11).** The mirror test: `full_name` appears
+in three tables and determines nothing. The seed draws customers and staff from the
+same 40 × 40 name pools, so **40 names identify both a customer and an employee** —
+proof by lived example that a name cannot be a key, and that only constraints make
+determinants (§5, note 3).
+
+![N11: 40 names shared by a customer and an employee](screenshots/11_bcnf_names_are_not_keys.png)
+
+### 9.5 · Two honest notes for anyone probing further
+
+Both notes are the same lesson: a functional dependency is a fact about *all possible*
+rows, not a pattern in one load of data.
+
+1. **Flat EMIs and flat product rates are seed properties, not schema rules.** Every
+   instalment of a loan carries the same EMI amount, and every loan of a product its
+   typical rate (all home loans at 8.50%). Nothing in the schema constrains either —
+   a step-up EMI schedule or a negotiated 8.90% home loan is perfectly insertable —
+   so `loan_id → amount` and `loan_type → interest_rate` are not FDs of these
+   relations. "Looks determining in one instance" is exactly the trap N11 refutes.
+2. **`accounts.balance` is stored, not derived** — the one documented, deliberate
+   deviation, with its reason written next to it (§7).
+
+The script, the screenshots and this section are part of the §8 sync contract: if the
+DDL ever changes a key or constraint, `queries/normalization_proof.sql` and these
+images are regenerated with everything else.

@@ -59,20 +59,23 @@ All nine tables are in BCNF, and the full working (not just the verdict) is in [
 
 ## 1. 📌 Project status
 
-Keeping this near the top so it's easy to see where things stand. The design side is complete and cross-checked; the remaining items are the parts that need sample data and the full query set.
+Keeping this near the top so it's easy to see where things stand. The design side is complete and cross-checked, the DDL now runs verified on a live server, the seed is loaded and reproducible, and the full query set Q1–Q10 is done — what remains is the closing work: the result screenshots, the test-case sheets and the report, per the split in [§16](#16--team-and-contributions).
+
 | Part | Owner | Status |
 |---|---|---|
-| Schema design + DDL  — [`schema/create_tables.sql`](schema/create_tables.sql) | Aryan | ✅ done |
+| Schema design + DDL ([`schema/create_tables.sql`](schema/create_tables.sql)) | Aryan | ✅ done |
 | Design docs — [design write-up](docs/DATABASE_DESIGN.md), [normalization proof](docs/NORMALIZATION.md), [data dictionary](docs/DATA_DICTIONARY.md) | Aryan | ✅ done |
 | Diagrams (6, in [`diagrams/`](diagrams)) | Aryan | ✅ done |
-| Design review pass (Q5) — produced DDL v2, see [§14](#14--how-the-design-was-verified) | Amruta | ✅ done |
-| Bringing the DDL up on MySQL + verification runs (Q4) | Siva | ⏳ in progress |
-| Business query set (Q3 and Q6) test cases | Jashan | ⏳ in progress |
-| Business query set (Q2 and Q7), final project report, SQL test cases + README update | Thammiksha | ✅ done |
-| Seed / demo data (Q1) | Harsita | ⏳ in progress |
+| Design review pass (produced DDL v2 — see [§14](#14--how-the-design-was-verified)) | Amruta | ✅ done |
+| Bringing the DDL up on MySQL + verification runs — the v2.1 trigger fix ([§14](#14--how-the-design-was-verified)) | Ganga | ✅ done |
+| Normalization proof executed as SQL + result screenshots ([§10](#10--normalization)) | Aryan | ✅ done |
+| Seed / demo data — [`data/insert_data.sql`](data/insert_data.sql) v1.1 (3,242 rows) | Harsita | ✅ done |
+| Business query set — **all ten done**: Q1–Q7 in `queries/query.sql` (Q1 **Harsita** · Q2 & Q7 **Thammiksha** · Q3 & Q6 **Jashan** · Q4 **Ganga** · Q5 **Amruta**) and Q8–Q10 (**Aryan**) in [`queries/aryan_queries.sql`](queries/aryan_queries.sql) — answers in [`docs/ANSWERS.md`](docs/ANSWERS.md), screenshot slots in [§13.1](#131-the-curated-set--who-did-what-and-where-the-screenshots-go) | everyone | ✅ queries · ⏳ screenshots |
+| Test cases (10 each) | Thanmiksha, Jashan | ⏳ in progress |
+| Project report | Thanmiksha, Amruta | ⏳ in progress |
 | Final README + docs update | everyone | 📋 after the above |
 
-Once the three ⏳ rows are done, this table (and the rest of this README) gets one final update and the status badge at the top flips to *complete*.
+Once the remaining ⏳ work — the screenshots, the test-case sheets and the report — is done, this table (and the rest of this README) gets its final update and the status badge at the top flips to *complete*.
 
 ## 2. 🏦 What FinCore is
 
@@ -190,16 +193,46 @@ If you want to check a single column's definition without opening the DDL, this 
 FinCore/
 ├── README.md                        ← you are here
 ├── schema/
-│   ├── create_tables.sql            DDL v2.1 — 9 tables, 34 named constraints,
-│   │                                3 secondary indexes; idempotent (re-runnable)
-│   └── insert_datav1.1_fixed.sql    seed/demo data — 3,242 rows, deterministic
+│   └── create_tables.sql            DDL v2.1 — 9 tables, 34 named constraints
+│                                    + 2 triggers, 3 secondary indexes;
+│                                    idempotent (re-runnable) — the reset
+│                                    button between demos
+├── data/
+│   └── insert_data.sql              seed v1.1 — deterministic demo data:
+│                                    3,242 rows, no RAND() (identical every
+│                                    run), self-check block at the end
+├── queries/
+│   ├── query.sql                    the team's curated business queries —
+│   │                                Q1–Q7 (one owner each); §13.1 maps
+│   │                                each question to its result screenshot
+│   ├── aryan_queries.sql            Aryan's Q8–Q10, closing the curated
+│   │                                set (§13.1): the payee bank split,
+│   │                                the top-5 transfers, the recovery book
+│   ├── bonus_queries.sql            the three unique questions (§13.2):
+│   │                                recursive CTE, RANK() window, Benford
+│   │                                screen — expected results in comments
+│   └── normalization_proof.sql      the §10 proof, executed: 11 checks
+│                                    (1NF → BCNF), expected results in
+│                                    comments next to every query
 ├── docs/
+│   ├── ANSWERS.md                   the answers file: every question from
+│   │                                §13 — the curated set, the three
+│   │                                unique questions and the proof checks
+│   │                                — with its exact expected result on
+│   │                                the loaded seed
 │   ├── DATABASE_DESIGN.md           the main write-up: goals, relationships,
 │   │                                decisions D1–D6 with rejected alternatives,
 │   │                                normalization summary, verification story
 │   ├── NORMALIZATION.md             the full working: 1NF → 2NF → 3NF → BCNF
 │   │                                progression, FD-by-FD proof for all 9
 │   │                                relations, 4NF/5NF, documented deviations
+│   │                                + §9: the proof executed as SQL, with a
+│   │                                result screenshot per check
+│   ├── screenshots/                 the 11 result screenshots (N1–N11) backing
+│   │                                NORMALIZATION.md §9 — one per check
+│   ├── screenshots/queries/         slots for the business-query results —
+│   │                                q01–q10 plus the three bonus questions
+│   │                                (the checklist lives in §13.1)
 │   └── DATA_DICTIONARY.md           all 57 columns + design notes + the FK /
 │                                    CHECK / UNIQUE / index / ENUM catalogs
 └── diagrams/
@@ -212,7 +245,8 @@ FinCore/
                                         indexes, ON DELETE chips (§4.6)
 ```
 
-The three docs cross-reference each other instead of repeating themselves: the design doc holds the *reasoning*, the dictionary holds the *column-level facts*, the normalization doc holds the *proof* — and the DDL is what all three are checked against. If the DDL ever changes, the docs and diagrams are regenerated with it (the sync contract in [§14](#14--how-the-design-was-verified)).
+The three docs cross-reference each other instead of repeating themselves: the design doc holds the *reasoning*, the dictionary holds the *column-level facts*, the normalization doc holds the *proof* (argued in §1–§8, executed in §9) — and the DDL is what all of them are checked against. If the DDL ever changes, the docs, diagrams, seed and proof script are regenerated with it (the sync contract in [§14](#14--how-the-design-was-verified)).
+
 
 ## 7. 📊 The schema at a glance
 
@@ -521,16 +555,21 @@ We didn't leave checking to the end — these are the checks that were actually 
 
 ## 16. 👥 Team and contributions
 
-| Member | Role |
-|---|---|
-| **Aryan Rao** | ER diagram, normalization, database design, constraints, Tasks 8, 9 & 10 |
-| **Amruta Nagavi** | Verification, report, README, Task 5 |
-| **Ganga Siva Kumar Reddy** | Database creation, Task 4 |
-| **Harsita** | Sample data, Task 1 |
-| **Elluri Thammiksha** | Tasks 2 & 7, README, report, 10 test cases |
-| **Jashan S** | Tasks 3 & 6, GitHub repository, README, 10 test cases |
+How Team 3 splits the work — the consolidated assignment. Each member owns specific responsibilities and specific queries from the business question set (Q1–Q10):
 
-*Note from Aryan:* the schema and every document in `docs/` are my work, and the mistakes v1 contained were mine too — which is why the v2 corrections are written down where they happened instead of being quietly patched. Amruta's review pass is what caught them; that's exactly what review is for.
+| Member | Responsibilities | Assigned queries | Artifacts in this repository |
+|---|---|---|---|
+| **Aryan Rao** (AU25UG-006) | E-R diagram, normalization, database design constraints | Q8, Q9, Q10 — done | [`schema/create_tables.sql`](schema/create_tables.sql) — the DDL and its 34 named constraints; all six [diagrams](diagrams/); the [`docs/`](docs) write-ups including the [answers file](docs/ANSWERS.md); [`queries/aryan_queries.sql`](queries/aryan_queries.sql) — his Q8–Q10 closing the curated set; [`queries/normalization_proof.sql`](queries/normalization_proof.sql) with its 11 result screenshots; and [`queries/bonus_queries.sql`](queries/bonus_queries.sql) — the three unique questions |
+| **Harsita** (AU25UG-019) | Sample data | Q1 — done | [`data/insert_data.sql`](data/insert_data.sql) v1.1 — the 3,242-row deterministic demo dataset with its self-check |
+| **Thammiksha** ("Thammi") | README, report, 10 test cases | Q2, Q7 — done | the README's final revision, the report and the test-case sheets — in progress, landing with the final update ([§1](#1--project-status)) |
+| **Jashan** | GitHub repository setup & management, README, 10 test cases | Q3, Q6 — done | this repository itself — its structure, curation and pull-request flow — plus the test-case sheets (in progress, [§1](#1--project-status)) |
+| **Ganga Siva Kumar Reddy** ("Shiva") | Database creation | Q4 — done | the v2.1 implementation fix (CHECK → trigger, MySQL error 3823, [§14](#14--how-the-design-was-verified)) + the verification runs that confirmed the stack works on a live server |
+| **Amruta Nagavi** ("Amruta") | Verification, report, README | Q5 — done | the design-review pass that produced DDL v2, plus the upload verification that caught the v2.1 draft mix-up — both in [§14](#14--how-the-design-was-verified) |
+
+The Q-numbers refer to the team's ten assigned business questions — all ten are done: Q1–Q7 live in `queries/query.sql` and Aryan's Q8–Q10 in `queries/aryan_queries.sql`, each mapped to its owner and its result-screenshot slot in [§13.1](#131-the-curated-set--who-did-what-and-where-the-screenshots-go). The negative-test table in [§12](#12--try-to-break-it) is the distilled verification suite the formal test-case sheets build on.
+
+*Note from Aryan:* the schema and every document in `docs/` are my work, and the mistakes v1 and v2 contained were mine too — which is why the corrections log in [§14](#14--how-the-design-was-verified) is written down where things happened instead of being quietly patched. Amruta's review and Ganga's implementation run each caught one, and the seed's first real run caught its own — which is exactly what review, and actually running things, is for.
+
 
 ## 17. 📖 References
 

@@ -2,11 +2,11 @@
 
 > **Owner:** Aryan Rao (AU25UG-006) · **DDL:** v2.1 · **Seed:** [`data/insert_data.sql`](../data/insert_data.sql) v1.1 (3,242 rows)
 
-This file is the answers file. The questions live where they belong — the curated business set in the [README](../README.md#13--the-questions-it-answers), the three unique questions in [README §13.2](../README.md#132-the-three-unique-questions--beyond-the-assignment), the normalization proof checks in [`queries/normalization_proof.sql`](../queries/normalization_proof.sql) — and every *answer*, with its exact expected result on the loaded seed, lives here. The three parts:
+This file is the answers file. The questions live where they belong — the curated business set in the [README](../README.md#13--the-questions-it-answers)the normalization proof checks in [`queries/normalization_proof.sql`](../queries/normalization_proof.sql) — and every *answer*, with its exact expected result on the loaded seed, lives here. The two parts:
 
 - **[Part A](#part-a-the-curated-business-questions-q1-to-q10)** — the curated business questions, Q1 to Q10 (the team's assignment set)
-- **[Part B](#part-b-the-three-unique-questions-b1-to-b3)** — the three unique questions, B1 to B3 (beyond the assignment)
-- **[Part C](#part-c-the-normalization-proof-questions-n1-to-n11)** — the normalization proof questions, N1 to N11 (1NF → BCNF, executed)
+
+- **[Part B](#part-c-the-normalization-proof-questions-n1-to-n11)** — the normalization proof questions, N1 to N11 (1NF → BCNF, executed)
 
 **How the answers were produced.** Every number below was computed by replaying the seed's deterministic insert formulas against the queries — the same replay that verified all 3,242 rows against every DDL rule (0 violations, [README §14](../README.md#14--how-the-design-was-verified)). The seed contains no `RAND()` and no `CURDATE()`, so a fresh run reproduces every answer exactly. To see any of them live:
 
@@ -140,140 +140,8 @@ The purest demonstration of D6 in the whole set: there is no `recovery_pct`, no 
 
 ---
 
-## Part B. The three unique questions (B1 to B3)
 
-Each of these uses a MySQL 8 capability that none of the ten assigned questions needs — a recursive CTE, a ranking window function, and a logarithmic audit screen. All three are runnable as-is from [`queries/bonus_queries.sql`](../queries/bonus_queries.sql), each with its expected result in comments; this part is the answers and the walkthrough. Screenshot slots: `docs/screenshots/queries/b1_result.png`, `b2_result.png`, `b3_result.png`.
-
-### B1. The org chart, unrolled (recursive CTE)
-
-**The question.** How deep does the reporting line actually go, and who sits at each depth? The self-referencing `MANAGES` foreign key (`employees.manager_id`, the one recursive relationship in the model) answers "who reports to whom" one level at a time — walking it needs recursion.
-
-<details>
-<summary>The SQL (also in <a href="../queries/bonus_queries.sql">queries/bonus_queries.sql</a>)</summary>
-
-```sql
-WITH RECURSIVE org_chart AS (
-    SELECT employee_id, full_name, manager_id,
-           1 AS depth,
-           CAST(full_name AS CHAR(500)) AS chain
-    FROM employees
-    WHERE manager_id IS NULL              -- the top of each reporting tree
-    UNION ALL
-    SELECT e.employee_id, e.full_name, e.manager_id,
-           oc.depth + 1,
-           CONCAT(oc.chain, ' > ', e.full_name)
-    FROM employees e
-    JOIN org_chart oc ON e.manager_id = oc.employee_id
-)
-SELECT depth AS org_level, COUNT(*) AS staff_at_level
-FROM org_chart
-GROUP BY depth
-ORDER BY depth;
-```
-</details>
-
-**Answer: 2 rows.**
-
-| org_level | staff_at_level |
-|---|---|
-| 1 | 50 |
-| 2 | 150 |
-
-Level 1 is the 50 branch heads (`manager_id IS NULL` — one per branch); level 2 is everyone else. The seed's reporting forest is deliberately flat, and the query is depth-agnostic: swap the final `SELECT` for the `chain`/`depth` variant in the script (B1b) and the longest reporting line comes back — depth 2, e.g. `Lakshmi Bose > Vikas Pai`. Run it on a deeper org chart and it simply returns more levels.
-
-### B2. Dominance, or spike? (ranking window function)
-
-**The question.** The branch league table (Q2) crowns Branch 1 with a 5.4× lead on deposits — but was it ahead every month, or did a few explosive months carry it? This query *audits another query's conclusion*: one leaderboard per month, rank 1 only.
-
-<details>
-<summary>The SQL (also in <a href="../queries/bonus_queries.sql">queries/bonus_queries.sql</a>)</summary>
-
-```sql
-WITH monthly AS (
-    SELECT a.branch_id,
-           DATE_FORMAT(t.txn_date, '%Y-%m') AS ym,
-           SUM(t.amount) AS deposits
-    FROM transactions t
-    JOIN accounts a ON a.account_id = t.account_id
-    WHERE t.txn_type = 'deposit'
-    GROUP BY a.branch_id, ym
-),
-ranked AS (
-    SELECT ym, branch_id, deposits,
-           RANK() OVER (PARTITION BY ym ORDER BY deposits DESC) AS rnk
-    FROM monthly
-)
-SELECT r.ym AS month, b.name AS leading_branch, r.deposits
-FROM ranked r
-JOIN branches b ON b.branch_id = r.branch_id
-WHERE r.rnk = 1
-ORDER BY r.ym;
-```
-</details>
-
-**Answer: 12 rows — and the verdict is "spike, not dominance."**
-
-| Month | Leading branch | Deposits (₹) | Margin over runner-up |
-|---|---|---|---|
-| 2025-10 | Branch 16 | 223,965 | 1.1× |
-| 2025-11 | Branch 6 | 215,665 | 1.0× |
-| 2025-12 | Branch 6 | 207,365 | 1.1× |
-| 2026-01 | Branch 25 | 282,786 | 1.4× |
-| 2026-02 | Branch 20 | 234,806 | 1.5× |
-| 2026-03 | Branch 8 | 260,638 | 1.2× |
-| 2026-04 | Branch 10 | 218,206 | 1.1× |
-| **2026-05** | **Branch 1** | **1,728,094** | **6.6×** |
-| **2026-06** | **Branch 1** | **2,469,186** | **10.5×** |
-| **2026-07** | **Branch 1** | **1,989,465** | **9.7×** |
-| **2026-08** | **Branch 1** | **1,350,482** | **8.6×** |
-| 2026-09 | Branch 8 | 147,544 | 1.0× |
-
-Branch 1 leads only the four months from May to August 2026; the other eight months go to six different branches (16 once, 6 twice, 25 once, 20 once, 8 twice, 10 once). The league-table crown is four explosive months, not steady dominance — exactly the kind of thing a `GROUP BY` total hides and a window function per partition exposes.
-
-### B3. The Benford screen (first-digit audit)
-
-**The question.** Real transaction amounts follow Benford's law — the chance of a first digit *d* is log₁₀(1 + 1/d), so amounts starting with 1 should be about 30.1% and amounts starting with 9 about 4.6%. Fabricated, formula-built amounts deviate. Where do our 552 amounts land?
-
-<details>
-<summary>The SQL (also in <a href="../queries/bonus_queries.sql">queries/bonus_queries.sql</a>)</summary>
-
-```sql
-WITH digits AS (
-    SELECT CAST(SUBSTRING(CAST(amount AS CHAR), 1, 1) AS UNSIGNED) AS first_digit,
-           COUNT(*) AS observed
-    FROM transactions
-    GROUP BY first_digit
-),
-totals AS (SELECT COUNT(*) AS n FROM transactions)
-SELECT d.first_digit, d.observed,
-       ROUND(100 * d.observed / t.n, 1)               AS actual_pct,
-       ROUND(100 * LOG10(1 + 1 / d.first_digit), 1)   AS benford_pct,
-       ROUND(100 * d.observed / t.n
-             - 100 * LOG10(1 + 1 / d.first_digit), 1) AS deviation_pp
-FROM digits d CROSS JOIN totals t
-ORDER BY ABS(100 * d.observed / t.n - 100 * LOG10(1 + 1 / d.first_digit)) DESC;
-```
-</details>
-
-**Answer: 9 rows — digit 1 over-produced, digit 2 under.**
-
-| First digit | Observed | Actual % | Benford % | Deviation (pp) |
-|---|---|---|---|---|
-| 1 | 208 | 37.7 | 30.1 | **+7.6** |
-| 2 | 55 | 10.0 | 17.6 | **−7.6** |
-| 3 | 47 | 8.5 | 12.5 | −4.0 |
-| 4 | 47 | 8.5 | 9.7 | −1.2 |
-| 5 | 43 | 7.8 | 7.9 | −0.1 |
-| 6 | 41 | 7.4 | 6.7 | +0.7 |
-| 7 | 37 | 6.7 | 5.8 | +0.9 |
-| 8 | 37 | 6.7 | 5.1 | +1.6 |
-| 9 | 37 | 6.7 | 4.6 | +2.1 |
-
-That is the exact fingerprint of formula-built amounts — which is precisely what a deterministic seed is, so the screen *worked*: it flagged our manufactured data as manufactured. The honest note: Benford's law describes populations, not 552-row samples, so this is a demonstration of the technique (one CTE + `LOG10()` turning an amounts column into a fraud-audit signal), not evidence of anything wrong.
-
----
-
-## Part C. The normalization proof questions (N1 to N11)
+## Part b. The normalization proof questions (N1 to N11)
 
 The proof that all nine relations are in BCNF is *argued* in [`NORMALIZATION.md`](NORMALIZATION.md) (FD by FD) and *executed* as eleven plain SELECTs in [`queries/normalization_proof.sql`](../queries/normalization_proof.sql) — each check is a question about the schema or the data, and this part is the answers. The eleven result screenshots are in [`docs/screenshots/`](screenshots) (numbered `01`–`11` in the order below), walked through in [NORMALIZATION.md §9](NORMALIZATION.md#9--the-proof-executed--sql-and-results).
 

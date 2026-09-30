@@ -1,1 +1,17 @@
+-- ============================================================================
+-- Q4 · Which customers have no transactions?
+-- Concepts:  A customer counts only if NONE of their
+-- accounts has ever transacted.
+-- ============================================================================
 
+USE fincore;
+
+SELECT
+    c.customer_id,
+    c.full_name
+FROM customers c
+LEFT JOIN accounts a
+    ON c.customer_id = a.customer_id
+LEFT JOIN transactions t
+    ON a.account_id = t.account_id
+WHERE t.txn_id IS NULL;

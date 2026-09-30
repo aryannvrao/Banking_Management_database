@@ -36,6 +36,24 @@ LEFT JOIN transactions t
 WHERE t.txn_id IS NULL;
 
 -- ============================================================================
+-- Q5 · Who are the customers with the highest total balances? 
+-- Concepts:  SUM across accounts, ranking  
+-- ============================================================================
+use fincore;
+select
+    c.customer_id,
+    c.full_name,
+    COUNT(a.account_id) AS account_count,
+    SUM(a.balance)      AS total_balance,
+    dense_rank() over (ORDER BY SUM(a.balance) desc) AS balance_rank
+from customers c
+JOIN accounts a
+    ON a.customer_id = c.customer_id
+group by c.customer_id, c.full_name
+order by total_balance desc
+limit 5;
+
+-- ============================================================================
 Query 7:Which loan payments are overdue? 
 Concepts : Datecomparison,NULLhandling 
 -- ============================================================================

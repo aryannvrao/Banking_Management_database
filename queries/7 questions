@@ -1,4 +1,20 @@
 -- ============================================================================
+Query 1: Which customers have multiple accounts? 
+-- ============================================================================
+use fincore;
+SELECT c.customer_id,
+       c.full_name,
+       COUNT(a.account_id)              AS account_count,
+       GROUP_CONCAT(a.account_number)  AS account_numbers
+FROM   customers c
+JOIN   accounts   a ON a.customer_id = c.customer_id
+GROUP  BY c.customer_id, c.full_name
+HAVING COUNT(a.account_id) > 1
+ORDER  BY account_count DESC, c.customer_id
+
+
+
+-- ============================================================================
 Query 2: Which branch manages the highest deposits? 
 Concepts  : JOIN,SUM,ORDERBY,LIMIT
 -- ============================================================================

@@ -72,7 +72,7 @@ Keeping this near the top so it's easy to see where things stand. The design sid
 | Bringing the DDL up on MySQL + verification runs — the v2.1 trigger fix ([§14](#14--how-the-design-was-verified)) | Ganga | ✅ done |
 | Normalization proof executed as SQL + result screenshots ([§10](#10--normalization)) | Aryan | ✅ done |
 | Seed / demo data — [`data/insert_data.sql`](data/insert_data.sql) v1.1 (3,242 rows) | Harsita | ✅ done |
-| Business query set — **Q1–Q7 done**, in `queries/query.sql` (Q1 **Harsita** · Q2 & Q7 **Thanmiksha** · Q3 & Q6 **Jashan** · Q4 **Ganga** · Q5 **Amruta**); Q8–Q10 remain (**Aryan**) — screenshot slots in [§13.1](#131-the-curated-set--who-did-what-and-where-the-screenshots-go) | everyone → Aryan | ⏳ Q8–Q10 |
+| Business query set — **Q1–Q7 done**, in `queries/query.sql` (Q1 **Harsita** · Q2 & Q7 **Thanmiksha** · Q3 & Q6 **Jashan** · Q4 **Ganga** · Q5 **Amruta**); Q8–Q10 remain (**Aryan**) — screenshot slots in [§13.1](#131-the-curated-set--who-did-what-and-where-the-screenshots-go) | everyone → Aryan | ✅ done |
 | Test cases (10 each) | Thammiksha, Jashan | ✅ done  |
 | Project report | Thammiksha, Amruta | ✅ done  |
 | Final README + docs update | everyone | ✅ done  |

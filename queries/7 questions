@@ -62,6 +62,27 @@ LEFT JOIN accounts a
 LEFT JOIN transactions t
     ON a.account_id = t.account_id
 WHERE t.txn_id IS NULL; 
+
+-- ============================================================================
+-- Q5 · Q5	Who are the customers with the highest total balances?	
+-- Concepts:  SUM across accounts, ranking them with dense_rank
+-- ============================================================================
+use fincore;
+
+select
+    c.customer_id,
+    c.full_name,
+    COUNT(a.account_id) AS account_count,
+    SUM(a.balance)      AS total_balance,
+    dense_rank() over (ORDER BY SUM(a.balance) desc) AS balance_rank
+from customers c
+JOIN accounts a
+    ON a.customer_id = c.customer_id
+group by c.customer_id, c.full_name
+order by total_balance desc
+limit 5;
+
+
 -- ============================================================================
 Query 6 : Which customers have active loans?
 Concept: JOIN with WHERE status filter

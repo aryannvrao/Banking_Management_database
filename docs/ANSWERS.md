@@ -116,8 +116,35 @@ These are the team's ten assigned questions, split across the six of us per [REA
 
 
 ### Q5. *(text in `queries/query.sql`)*
+### Q5. Who are the customers with the highest total balances?
 
-**Owner:** Amruta · **Screenshot slot:** `docs/screenshots/q05_result.png`
+**Owner:** Amruta · **Screenshot slot:** `docs/screenshots/queries/q05_result.png`
+
+**Answer: Divya Hegde (customer 1) holds ₹19,500,000 across 3 accounts, which
+is 14.6% of all deposits and over 11 times the next-largest customer.** The top
+five customers by combined balance:
+
+| Rank | Customer ID |    Customer    | Accounts | Total balance (₹) |
+|------|-------------|----------------|----------|-------------------|
+|     1|           1 |    Divya Hegde |        3 |     19,500,000.00 |
+|     2|         158 |    Vikas Sinha |        2 |      1,731,064.00 |
+|     3|         157 |   Anita Shetty |        2 |      1,715,226.00 |
+|     4|         156 |     Amit Mehta |        2 |      1,699,388.00 |
+|     5|         155 | Ananya Chauhan |        2 |      1,683,550.00 |
+
+The query sums `accounts.balance` per customer and ranks the totals with
+`DENSE_RANK()`. A customer's worth is spread over several accounts, so ranking
+single accounts would understate multi-account holders. The figures use the
+stored current balance, not a sum over `transactions`, which is the documented
+balance deviation (NORMALIZATION.md §7). Context: 170 customers hold accounts,
+total deposits are ₹133,459,966, and the top five together hold 19.7% of them.
+The 30 customers with no account (IDs 171–200) are absent because the query
+uses an inner join.
+
+**Conclusion:** The query ranks customers by their combined balance across all
+accounts, and one customer clearly leads the rest.
+
+
 
 The question text and SQL are Amruta's, in `queries/query.sql`. Its expected result joins this file with the screenshot when it is captured.
 

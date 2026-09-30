@@ -28,7 +28,7 @@ These are the team's ten assigned questions, split across the six of us per [REA
 
 ### Q1. Customers holding more than one account
 
-**Owner:** Harsita · **Screenshot slot:** `docs/screenshots/queries/q01_result.png`
+**Owner:** Harsita · **Screenshot slot:** `docs/screenshots/q01_result.png`
 
 **Answer: 50 customers.** The seed registers 200 customers holding 250 accounts — 150 hold exactly one account, and the remaining 50 hold two. The query groups `accounts` by `customer_id` and keeps the groups with `HAVING COUNT(*) > 1`; the expected result grid is 50 rows of *(full name, accounts held = 2)*.
 
@@ -36,7 +36,7 @@ These are the team's ten assigned questions, split across the six of us per [REA
 
 ### Q2. Branch league table — deposits by branch
 
-**Owner:** Thammiksha · **Screenshot slot:** `docs/screenshots/queries/q02_result.png`
+**Owner:** Thammiksha · **Screenshot slot:** `docs/screenshots/q02_result.png`
 
 **Answer:** **Main Road Branch, Bengaluru** manages the highest deposits with **₹83.92 lakh** in total deposits.
 
@@ -48,7 +48,7 @@ These are the team's ten assigned questions, split across the six of us per [REA
 
 ### Q3. Average account balance by branch
 
-**Owner:** Jashan · **Screenshot slot:** `docs/screenshots/queries/q03_result.png`
+**Owner:** Jashan · **Screenshot slot:** `docs/screenshots/q03_result.png`
 
 **Answer:** The average account balance varies across branches, with **Main Road Branch, Bengaluru** having the highest average account balance of **₹19,83,345.50** among the displayed branches.
 
@@ -80,7 +80,7 @@ These are the team's ten assigned questions, split across the six of us per [REA
 
 ### Q4. Customers with no transactions
 
-**Owner:** siva · **Screenshot slot:** `docs/screenshots/queries/q04_result.png`
+**Owner:** siva · **Screenshot slot:** `docs/screenshots/q04_result.png`
 
 **Answer:** The query identifies customers who have **no transaction records associated with any of their accounts** by using `LEFT JOIN` and filtering for missing transaction IDs.
 
@@ -117,13 +117,13 @@ These are the team's ten assigned questions, split across the six of us per [REA
 
 ### Q5. *(text in `queries/query.sql`)*
 
-**Owner:** Amruta · **Screenshot slot:** `docs/screenshots/queries/q05_result.png`
+**Owner:** Amruta · **Screenshot slot:** `docs/screenshots/q05_result.png`
 
 The question text and SQL are Amruta's, in `queries/query.sql`. Its expected result joins this file with the screenshot when it is captured.
 
 ### Q6.### Q6. Customers with active loans
 
-**Owner:** jashan· **Screenshot slot:** `docs/screenshots/queries/q06_result.png`
+**Owner:** jashan· **Screenshot slot:** `docs/screenshots/q06_result.png`
 
 **Answer:** The query identifies customers who currently have **active loans**, along with their loan type and principal amount.
 
@@ -146,7 +146,7 @@ The question text and SQL are Amruta's, in `queries/query.sql`. Its expected res
 
 ### Q7. Overdue loan payments
 
-**Owner:** Thammiksha · **Screenshot slot:** `docs/screenshots/queries/q07_result.png`
+**Owner:** Thammiksha · **Screenshot slot:** `docs/screenshots/q07_result.png`
 
 **Answer:** The database contains **15 overdue loan payments**. These payments have a `NULL` paid date and a due date earlier than the current date.
 
@@ -174,7 +174,7 @@ The question text and SQL are Amruta's, in `queries/query.sql`. Its expected res
 
 ### Q8. Where do our customers send money? — the payee bank split
 
-**Owner:** Aryan · **Screenshot slot:** `docs/screenshots/queries/q08_result.png`
+**Owner:** Aryan · **Screenshot slot:** `docs/screenshots/q08_result.png`
 
 **Answer: four in five registered payees (160 of 200, 80%) bank elsewhere; the 40 who bank with FinCore were registered by just 29 customers.** Each of the 200 payees is classified by its IFSC prefix — `AUSB` marks a FinCore branch — with a single `CASE`, no join needed:
 
@@ -187,7 +187,7 @@ This is design decision D3, quantified. `beneficiaries` deliberately carries **n
 
 ### Q9. The five largest transfers, reassembled
 
-**Owner:** Aryan · **Screenshot slot:** `docs/screenshots/queries/q09_result.png`
+**Owner:** Aryan · **Screenshot slot:** `docs/screenshots/q09_result.png`
 
 **Answer: the biggest transfer ever moved on the seed is ₹47,910 — account 111 → account 136, reference `TR0000000010`.** The five largest of the seed's 30 transfers:
 
@@ -203,7 +203,7 @@ This is the D2 transfer model doing what it was built for: a transfer is two pai
 
 ### Q10. The recovery book — collected vs scheduled, by loan status
 
-**Owner:** Aryan · **Screenshot slot:** `docs/screenshots/queries/q10_result.png`
+**Owner:** Aryan · **Screenshot slot:** `docs/screenshots/q10_result.png`
 
 **Answer: closed loans are 100.0% collected and the active book 98.1% — and the defaulted book collected just 16.7% of its scheduled value before default.**
 

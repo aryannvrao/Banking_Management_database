@@ -22,7 +22,7 @@ Database design & DDL: **Aryan Rao** (AU25UG-006) · Design review: **Amruta Nag
 
 ---
 
-FinCore is a MySQL database for a small retail bank: branches and the staff who run them, KYC-registered customers and the accounts they hold, a full record of every deposit, withdrawal and transfer, a lending side with EMI instalment schedules, and the payment rails on top — cards, and registered payees who may bank anywhere in India.
+FinCore is a MySQL database for a small retail bank: branches and the staff who run them, registered customers and the accounts they hold, a full record of every deposit, withdrawal and transfer, a lending side with EMI instalment schedules, and the payment rails on top — cards, and registered payees who may bank anywhere in India.
 
 We built it following two simple rules:
 

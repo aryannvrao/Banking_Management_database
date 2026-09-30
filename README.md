@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🏦 FinCore hihi
+# 🏦 FinCore 
 
 **Banking & Transaction Management Database**
 

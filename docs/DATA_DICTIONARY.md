@@ -12,7 +12,7 @@ it. The reasoning behind the *structure* (why these tables, why these relationsh
 
 **How to read the column tables** — **PK** primary key · **FK** foreign key · **UQ** unique key ·
 **AI** `AUTO_INCREMENT` · Null = `YES`/`NO` · Default = `DEFAULT` clause · money is always `DECIMAL` (never `FLOAT`).
-All `CHECK` violations fail with MySQL error **3819**; duplicate unique keys with **1062**; FK violations with **1452** (insert) / **1451** (delete/update).
+All `CHECK` violations fail with MySQL error **3819**; duplicate unique keys with **1062**; FK violations with **1452** (insert) / **1451** (delete/update); the one trigger-enforced rule (`chk_emp_not_own_manager`, v2.1) fails with **1644**.
 
 ---
 
@@ -174,7 +174,7 @@ a stored flag would rot overnight while the query stays correct forever.
 | 6 | `hire_date` | DATE | NO | | — | Employment start date |
 
 **Keys:** `pk_employees` · FKs `fk_emp_branch`, `fk_emp_manager` (self-referencing, `ON DELETE SET NULL`)
-**Check:** `chk_emp_not_own_manager` (`manager_id IS NULL OR manager_id <> employee_id` — nobody manages themselves)
+**Trigger rule:** `trg_emp_not_own_manager_ins` / `_upd` — `manager_id` is NULL or `<> employee_id` (nobody manages themselves). v2.1: this was a CHECK in v2, but MySQL 8 refuses a CHECK on a column used in an FK referential action (ERROR 3823 on `manager_id`), so the same rule moved into a BEFORE INSERT + BEFORE UPDATE trigger pair; violations fail with **1644** and the message still names `chk_emp_not_own_manager`.
 **Design notes:** the self-referencing `manager_id` is the design's one recursive
 relationship, and it is the cheapest possible org chart: any reporting question is a
 self-join, no extra table needed. `SET NULL` on delete is the humane choice — if a manager's
@@ -250,7 +250,7 @@ store only a hash and the last four digits — I am counting on the CHECK's rege
 **The whole policy in 3 lines:** RESTRICT = *audit history* · CASCADE = *owned data* · SET NULL = *reporting line*.
 Count check: **6 RESTRICT · 3 CASCADE · 1 SET NULL**.
 
-## 11 · CHECK constraint catalog — all 9 (v2)
+## 11 · CHECK constraint catalog — all 8 (v2.1)
 
 | # | Constraint | Table | Rule | Rejects (error 3819) |
 |---|-----------|-------|------|----------------------|
@@ -261,11 +261,22 @@ Count check: **6 RESTRICT · 3 CASCADE · 1 SET NULL**.
 | 5 | `chk_loans_rate` | loans | `0 <= interest_rate <= 100` | nonsense rates |
 | 6 | `chk_loans_tenure` | loans | `tenure_months BETWEEN 1 AND 360` | tenures outside 1 month–30 years |
 | 7 | `chk_payment_amount` | loan_payments | `amount > 0` | non-positive EMIs |
-| 8 | `chk_emp_not_own_manager` | employees | `manager_id <> employee_id` (or NULL) | self-management |
-| 9 | `chk_cards_number` | cards | `^[0-9]{16}$` | malformed PANs |
+| 8 | `chk_cards_number` | cards | `^[0-9]{16}$` | malformed PANs |
 
 Remember the version floor: these fire only on MySQL **8.0.16+** — older servers accept the
 syntax and then silently ignore every rule in this table.
+
+**Trigger catalog — 1 rule, 2 triggers (v2.1):**
+
+| Trigger | Fires | Rule (error **1644**) |
+|---|---|---|
+| `trg_emp_not_own_manager_ins` | BEFORE INSERT on employees | `manager_id` NULL or `<> employee_id` — nobody manages themselves |
+| `trg_emp_not_own_manager_upd` | BEFORE UPDATE on employees | same rule, for updates |
+
+Why a trigger and not a CHECK (the 9th row this catalog used to have): MySQL 8 rejects a
+CHECK on any column used in a foreign key referential action — ERROR 3823 on `manager_id` /
+`fk_emp_manager`. The rule is unchanged; only the mechanism moved (caught by Siva during
+implementation, signed off by Aryan — the full story is in `DATABASE_DESIGN.md` §7).
 
 ## 12 · UNIQUE key catalog — all 7 (2 composite)
 
@@ -318,11 +329,14 @@ in `DATABASE_DESIGN.md` §5).
 | Customers holding more than one account | `accounts.customer_id` | pure `GROUP BY … HAVING COUNT(*) > 1` |
 | A manager with ≥ 2 reportees | `employees.manager_id` | the self-referencing FK makes the self-join trivial |
 | Complete transfer pairs | `transactions.transfer_ref` | 2-row transfer model (D2) + `chk_txn_transfer_pairing` |
+| Payee bank split (business Q8) | `beneficiaries.ifsc_code` | payees may bank anywhere — no FK on the payee account (D3); the `AUSB` IFSC prefix classifies without a join |
+| The five largest transfers (business Q9) | `transactions.transfer_ref` | 2-row transfer model (D2); one `GROUP BY` reassembles each pair, `MIN(CASE …)` pivots the legs into columns |
+| The recovery book (business Q10) | `loan_payments.paid_date`, `loans.status` | collected vs scheduled derived at read time (D6) — no `recovery_pct`/`outstanding_amount` column anywhere |
 
 Every query in this table reads like a plain sentence because the shape it needs is already
 in the schema — that was the whole point of designing before querying.
 
 ---
 
-**Sync contract:** 9 tables · 57 columns · 10 FK (6 RESTRICT / 3 CASCADE / 1 SET NULL) · 9 CHECK · 7 UNIQUE · 3 secondary indexes (DDL v2).
+**Sync contract:** 9 tables · 57 columns · 10 FK (6 RESTRICT / 3 CASCADE / 1 SET NULL) · 8 CHECK · 7 UNIQUE · 3 secondary indexes · 2 triggers (DDL v2.1).
 If `create_tables.sql` changes, this file, `DATABASE_DESIGN.md` §2 and all diagrams must be regenerated together.

@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🏦 FinCore 
+# 🏦 FinCore
 
 **Banking & Transaction Management Database**
 
@@ -10,11 +10,13 @@ A DBMS course project · Team 3 · Atria University
 [![InnoDB](https://img.shields.io/badge/InnoDB-utf8mb4-00618A?logo=mysql&logoColor=white)](https://dev.mysql.com/doc/)
 [![Tables](https://img.shields.io/badge/tables-9-334155)](#7--the-schema-at-a-glance)
 [![Columns](https://img.shields.io/badge/columns-57-475569)](docs/DATA_DICTIONARY.md)
-[![Constraints](https://img.shields.io/badge/named_constraints-35-B7791F)](schema/create_tables.sql)
+[![Constraints](https://img.shields.io/badge/named_constraints-34-B7791F)](schema/create_tables.sql)
+[![Triggers](https://img.shields.io/badge/triggers-2-D97706)](#14--how-the-design-was-verified)
+[![Seed rows](https://img.shields.io/badge/seed_rows-3,242-0F766E)](data/insert_data.sql)
 [![Normalized](https://img.shields.io/badge/normalized-BCNF-6B46C1)](docs/NORMALIZATION.md)
 [![Status](https://img.shields.io/badge/status-in_progress-F59E0B)](#1--project-status)
 
-Database design & DDL: **Aryan Rao** (AU25UG-006) · Design review: **Amruta Nagavi**
+Database design & DDL: **Aryan Rao** (AU25UG-006) · Design review: **Amruta Nagavi** · Implementation runs: **Ganga Siva Kumar Reddy** · Seed data: **Harsita** (AU25UG-019)
 
 </div>
 
@@ -24,12 +26,12 @@ FinCore is a MySQL database for a small retail bank: branches and the staff who 
 
 We built it following two simple rules:
 
-- **If MySQL can enforce a rule, the rule goes in the database.** 34 named constraints in the DDL — CHECKs, foreign keys, UNIQUE keys — not checks in application code that somebody could forget to call.
+- **If MySQL can enforce a rule, the rule goes in the database.** 34 named constraints and 2 triggers in the DDL — CHECKs, foreign keys, UNIQUE keys, triggers — not checks in application code that somebody could forget to call.
 - **Write down every decision, including the ones we rejected.** The docs in this repo explain why the schema looks the way it does, so a reader can check our reasoning instead of taking our word for it.
 
-All nine tables are in BCNF, and the full working (not just the verdict) is in [`docs/NORMALIZATION.md`](docs/NORMALIZATION.md).
+All nine tables are in BCNF, and the full working (not just the verdict) is in [`docs/NORMALIZATION.md`](docs/NORMALIZATION.md) — which also *executes* the proof as SQL ([`queries/normalization_proof.sql`](queries/normalization_proof.sql), results in that doc's §9).
 
-> ℹ️ **Status:** the database design, docs and diagrams are done. Siva (implementation runs), Jashan (business queries) and Harsita (seed data) are still working on their parts — once everyone's finished, we'll update this README one final time. Details in [§1 · Project status](#1--project-status).
+> ℹ️ **Status:** the design, docs, diagrams, the DDL bring-up (Ganga), the seed (Harsita, v1.1) and the normalization proof are done — and so are Q1–Q7 of the business query set: everyone's questions are in `queries/query.sql`, the answers in [`docs/ANSWERS.md`](docs/ANSWERS.md). Remaining: Aryan's Q8–Q10, the result screenshots, the test-case sheets and the report — when they land, this README gets its final update. Details in [§1 · Project status](#1--project-status).
 
 ![Table relationships map](diagrams/table_relationships.png)
 
@@ -59,7 +61,7 @@ All nine tables are in BCNF, and the full working (not just the verdict) is in [
 
 ## 1. 📌 Project status
 
-Keeping this near the top so it's easy to see where things stand. The design side is complete and cross-checked, the DDL now runs verified on a live server, the seed is loaded and reproducible, and the full query set Q1–Q10 is done — what remains is the closing work: the result screenshots, the test-case sheets and the report, per the split in [§16](#16--team-and-contributions).
+Keeping this near the top so it's easy to see where things stand. The design side is complete and cross-checked, the DDL now runs verified on a live server, the seed is loaded and reproducible, and Q1–Q7 of the query set are done — what remains is the closing work: Aryan's Q8–Q10, the result screenshots, the test-case sheets and the report, per the split in [§16](#16--team-and-contributions).
 
 | Part | Owner | Status |
 |---|---|---|
@@ -70,12 +72,12 @@ Keeping this near the top so it's easy to see where things stand. The design sid
 | Bringing the DDL up on MySQL + verification runs — the v2.1 trigger fix ([§14](#14--how-the-design-was-verified)) | Ganga | ✅ done |
 | Normalization proof executed as SQL + result screenshots ([§10](#10--normalization)) | Aryan | ✅ done |
 | Seed / demo data — [`data/insert_data.sql`](data/insert_data.sql) v1.1 (3,242 rows) | Harsita | ✅ done |
-| Business query set — **all ten done**: Q1–Q7 in `queries/query.sql` (Q1 **Harsita** · Q2 & Q7 **Thammiksha** · Q3 & Q6 **Jashan** · Q4 **Ganga** · Q5 **Amruta**) and Q8–Q10 (**Aryan**) in [`queries/aryan_queries.sql`](queries/aryan_queries.sql) — answers in [`docs/ANSWERS.md`](docs/ANSWERS.md), screenshot slots in [§13.1](#131-the-curated-set--who-did-what-and-where-the-screenshots-go) | everyone | ✅ queries · ⏳ screenshots |
+| Business query set — **Q1–Q7 done**, in `queries/query.sql` (Q1 **Harsita** · Q2 & Q7 **Thanmiksha** · Q3 & Q6 **Jashan** · Q4 **Ganga** · Q5 **Amruta**); Q8–Q10 remain (**Aryan**) — screenshot slots in [§13.1](#131-the-curated-set--who-did-what-and-where-the-screenshots-go) | everyone → Aryan | ⏳ Q8–Q10 |
 | Test cases (10 each) | Thanmiksha, Jashan | ⏳ in progress |
 | Project report | Thanmiksha, Amruta | ⏳ in progress |
 | Final README + docs update | everyone | 📋 after the above |
 
-Once the remaining ⏳ work — the screenshots, the test-case sheets and the report — is done, this table (and the rest of this README) gets its final update and the status badge at the top flips to *complete*.
+Once the remaining ⏳ rows — Q8–Q10, the screenshots, the test-case sheets and the report — are done, this table (and the rest of this README) gets its final update and the status badge at the top flips to *complete*.
 
 ## 2. 🏦 What FinCore is
 
@@ -83,7 +85,7 @@ The system models one small bank end-to-end. On the **master-data** side sit `br
 
 Before drawing a single box, we fixed five ground rules and stuck to them. They explain most of what follows:
 
-1. **Rules go in the database where possible.** Negative balances, zero-amount movements, self-managing employees and malformed card numbers are rejected by CHECK constraints, triggers and ENUMs — not by app code that somebody could bypass.
+1. **Rules go in the database where possible.** Negative balances, zero-amount movements, self-managing employees and malformed card numbers are rejected by CHECK constraints, ENUMs and triggers — not by app code that somebody could bypass.
 2. **Don't delete history.** Deleting anything with financial history attached is blocked by the referential actions in [§8](#8--the-ten-relationships).
 3. **Don't store what you can derive.** There is no `is_overdue`, no `age`, no `outstanding_amount` column anywhere — truths that change with the calendar are computed at query time, so the data can never contradict itself.
 4. **Money is exact.** `DECIMAL(12,2)` everywhere, never `FLOAT`, because binary fractions cannot represent ten paise exactly.
@@ -181,7 +183,7 @@ If you want to check a single column's definition without opening the DDL, this 
 | Physical design — data types, ENUM, DECIMAL, CHAR vs VARCHAR | the DDL itself; dictionary §1–§9 |
 | Referential integrity — FK policy with per-relationship actions | §8 below; dictionary §10 |
 | Domain integrity — CHECK, UNIQUE, ENUM catalogs | §7 and §12; dictionary §11, §12, §14 |
-| Normalization to BCNF, 4NF, 5NF — with proofs, not verdicts | §10 below; [`docs/NORMALIZATION.md`](docs/NORMALIZATION.md) |
+| Normalization to BCNF, 4NF, 5NF — with proofs, not verdicts | §10 below; [`docs/NORMALIZATION.md`](docs/NORMALIZATION.md); executed: [`queries/normalization_proof.sql`](queries/normalization_proof.sql) |
 | Query design — the schema exists to answer questions | §13 below; dictionary §15 |
 | Indexing strategy | §7 (inventory row) and §14; dictionary §13 |
 | System architecture, ANSI/SPARC mapping | §4.1 above; design doc §1 |
@@ -203,11 +205,9 @@ FinCore/
 │                                    run), self-check block at the end
 ├── queries/
 │   ├── query.sql                    the team's curated business queries —
-│   │                                Q1–Q7 (one owner each); §13.1 maps
+│   │                                Q1–Q7 done (one owner each), Q8–Q10
+│   │                                land with the final update; §13.1 maps
 │   │                                each question to its result screenshot
-│   ├── aryan_queries.sql            Aryan's Q8–Q10, closing the curated
-│   │                                set (§13.1): the payee bank split,
-│   │                                the top-5 transfers, the recovery book
 │   ├── bonus_queries.sql            the three unique questions (§13.2):
 │   │                                recursive CTE, RANK() window, Benford
 │   │                                screen — expected results in comments
@@ -247,7 +247,6 @@ FinCore/
 
 The three docs cross-reference each other instead of repeating themselves: the design doc holds the *reasoning*, the dictionary holds the *column-level facts*, the normalization doc holds the *proof* (argued in §1–§8, executed in §9) — and the DDL is what all of them are checked against. If the DDL ever changes, the docs, diagrams, seed and proof script are regenerated with it (the sync contract in [§14](#14--how-the-design-was-verified)).
 
-
 ## 7. 📊 The schema at a glance
 
 | Inventory | Value |
@@ -256,7 +255,8 @@ The three docs cross-reference each other instead of repeating themselves: the d
 | Columns | 57 |
 | Primary keys | 9 — all surrogate `AUTO_INCREMENT` integers (decision D1) |
 | Foreign keys | 10 — **6 RESTRICT · 3 CASCADE · 1 SET NULL** (all `ON UPDATE CASCADE`) |
-| CHECK constraints | 8 — violations fail with MySQL error **3819** (the self-manager rule is a trigger, error **1644**) |
+| CHECK constraints | 8 — violations fail with MySQL error **3819** |
+| Triggers | 2 — `trg_emp_not_own_manager_ins` / `_upd`; violations fail with **1644** (v2.1, see [§14](#14--how-the-design-was-verified)) |
 | UNIQUE keys | 7 — 5 single-column, 2 composite |
 | ENUM domains | 7 — frozen business vocabularies (account type, txn type, …) |
 | Secondary indexes | 3 — `idx_txn_date`, `idx_loan_status`, `idx_payment_due` |
@@ -274,7 +274,7 @@ The nine tables, what one row in each means, and the keys that govern it:
 | `transactions` | one money movement, append-only | PK `txn_id` · FK → accounts (RESTRICT) · `amount > 0` and transfer-pairing (CHECKs) |
 | `loans` | one sanctioned loan | PK `loan_id` · FKs → customers, branches · principal/rate/tenure bounds (CHECKs) |
 | `loan_payments` | one scheduled EMI of one loan | PK `payment_id` · UNIQUE `(loan_id, instalment_no)` · FK → loans (CASCADE) |
-| `employees` | one staff member | PK `employee_id` · FKs → branches, **employees (self, SET NULL)** · nobody manages themselves (trigger) |
+| `employees` | one staff member | PK `employee_id` · FKs → branches, **employees (self, SET NULL)** · nobody manages themselves (2 triggers, v2.1) |
 | `beneficiaries` | one payee registered by a customer | PK `beneficiary_id` · UNIQUE `(customer_id, account_no, ifsc_code)` · deliberately **no** FK on the payee account (D3) |
 | `cards` | one card issued on an account | PK `card_id` · UNIQUE `card_number` · FK → accounts (CASCADE) · 16-digit format (CHECK) |
 
@@ -346,6 +346,8 @@ Beyond BCNF: **4NF** holds because no attribute holds a *set* of values per key 
 
 Two deviations are on record in the normalization doc §7, each with the reason written next to it: `accounts.balance` is stored rather than re-derived on every read (controlled redundancy, maintained in the same transaction as the movement), and vocabularies live in ENUMs rather than lookup tables (same integrity, no join).
 
+**The proof is executed, not just argued.** [`queries/normalization_proof.sql`](queries/normalization_proof.sql) runs eleven checks — one per claim above — against the seeded database, and the normalization doc's [§9 · the proof, executed](docs/NORMALIZATION.md) walks through each query with its result screenshot ([`docs/screenshots/`](docs/screenshots)). Because the seed is deterministic, anyone re-running the script gets exactly the numbers shown there. The eleven checks — each a question, each with its answer — are also summarised in the answers file, [Part C](docs/ANSWERS.md#part-c-the-normalization-proof-questions-n1-to-n11).
+
 ## 11. 🚀 Running it
 
 **Prerequisite — MySQL 8.0.16 or newer** (8.0.x, 8.4.x and 9.x all work). This is a hard floor, not a preference: before 8.0.16, MySQL *parses* CHECK constraints and then **silently ignores them** — an older server will accept this DDL and then let negative balances in. Check yours:
@@ -362,9 +364,17 @@ SELECT VERSION();   -- must report 8.0.16 or higher
 mysql -u root -p < schema/create_tables.sql
 ```
 
-or open `schema/create_tables.sql` in MySQL Workbench and execute the whole script. The script creates the `fincore` database itself (`utf8mb4`), drops any existing tables **children first**, then creates the nine tables **parents first** along with the three supporting indexes. It's idempotent — re-running it from scratch always works, and it's the intended reset button between demos.
+or open `schema/create_tables.sql` in MySQL Workbench and execute the whole script. The script creates the `fincore` database itself (`utf8mb4`), drops any existing tables **children first**, then creates the nine tables **parents first**, the three supporting indexes and the two triggers (the `DELIMITER` lines near the end are client commands for the trigger bodies — they must stay on their own lines). It's idempotent — re-running it from scratch always works, and it's the intended reset button between demos.
 
-**Step 3 — verify the install.** These queries and their expected results are what the DDL promises:
+**Step 3 — load the demo data.** The seed ships as [`data/insert_data.sql`](data/insert_data.sql) (v1.1, by Harsita):
+
+```bash
+mysql -u root -p < data/insert_data.sql
+```
+
+It loads **3,242 rows** — 200 branches, 200 customers, 200 employees, 250 accounts, 552 transactions (including 30 transfers stored D2-style as paired legs), 200 loans, 1,200 EMI schedule rows, 200 beneficiaries and 240 cards — with a handful of engineered situations for the business questions (a multi-account "whale", dormant accounts, missed EMIs, defaulted loans, expired and blocked cards). It is fully deterministic: no `RAND()`, every value a formula on `n`, so re-running it always produces the same database, and its self-check block at the end prints the expected row counts. *Always re-run the DDL first* — it is the reset button that clears the previous demo.
+
+**Step 4 — verify the install.** These queries and their expected results are what the DDL promises:
 
 ```sql
 USE fincore;
@@ -379,6 +389,10 @@ FROM information_schema.TABLE_CONSTRAINTS   -- UNIQUE 7 · CHECK 8   (total 34)
 WHERE TABLE_SCHEMA = 'fincore'
 GROUP BY CONSTRAINT_TYPE;
 
+SELECT TRIGGER_NAME, ACTION_TIMING, EVENT_MANIPULATION   -- 2 rows: trg_emp_not_own_manager_ins/_upd
+FROM information_schema.TRIGGERS                          -- BEFORE INSERT / BEFORE UPDATE
+WHERE EVENT_OBJECT_SCHEMA = 'fincore';                    -- on employees
+
 SELECT DELETE_RULE, COUNT(*) AS count       -- RESTRICT 6 · CASCADE 3 · SET NULL 1
 FROM information_schema.REFERENTIAL_CONSTRAINTS
 WHERE CONSTRAINT_SCHEMA = 'fincore'
@@ -387,7 +401,7 @@ GROUP BY DELETE_RULE;
 
 (On some 8.0.x servers RESTRICT is reported as `NO ACTION` — the two are synonyms in InnoDB, so 6 × RESTRICT/NO ACTION is the expected total.) Per-table column counts, if you want the full 57 broken down: `accounts` 7 · `beneficiaries` 6 · `branches` 4 · `cards` 7 · `customers` 6 · `employees` 6 · `loan_payments` 6 · `loans` 9 · `transactions` 6.
 
-The schema ships deliberately **without seed data** — the DDL is the reviewed artifact, and demo data is a separate work package (see [§1](#1--project-status)). A five-statement smoke test you can use to check your install is the first code block in [§12](#12--try-to-break-it).
+The DDL and the seed are deliberately **separate files** — the schema is the reviewed artifact, the data is a work package of its own ([§1](#1--project-status)), and re-running the DDL remains the reset button between demos. Two optional extras: if you'd rather poke at a hand-typed row or two before loading the full seed, the five-statement smoke test in [§12](#12--try-to-break-it) still works on a fresh DDL run; and once the seed is loaded, [`queries/normalization_proof.sql`](queries/normalization_proof.sql) re-runs the [§10](#10--normalization) proof with every expected result in comments — the SQL-side evidence that all nine relations are in BCNF.
 
 ## 12. 🧪 Try to break it
 
@@ -418,14 +432,14 @@ Now the negative tests — each statement should **fail** with exactly the error
 | 5 | `DELETE FROM accounts WHERE account_id = 1;` — the account has history | `fk_txn_account` (RESTRICT) | **1451** |
 | 6 | `INSERT INTO customers (full_name, dob, phone, email, address) VALUES ('Second Meera', '1990-01-01', '9800000000', 'meera.nair@example.com', 'Elsewhere');` — duplicate email | `uq_customers_email` | **1062** |
 | 7 | `INSERT INTO accounts (account_number, customer_id, branch_id, account_type, opened_on) VALUES ('ACC10000002', 1, 1, 'saving', '2026-01-11');` — ENUM typo (`'saving'`) | `account_type` ENUM | **1265** |
-| 8 | `UPDATE employees SET manager_id = employee_id WHERE employee_id = 1;` — self-management | `trigger trg_emp_not_own_manager_upd` | **1644** |
+| 8 | `UPDATE employees SET manager_id = employee_id WHERE employee_id = 1;` — self-management | `trg_emp_not_own_manager_upd` (trigger, v2.1) | **1644** |
 | 9 | `INSERT INTO cards (account_id, card_number, card_type, expiry_date, issued_on) VALUES (1, '12345678ABCD2345', 'debit', '2029-12-31', '2026-01-15');` — letters in a PAN | `chk_cards_number` | **3819** |
 
 > ⚠️ Diagnostics tip: if a "negative test" **succeeds** instead of failing, you're almost certainly on a pre-8.0.16 server where CHECKs are silently ignored — check `SELECT VERSION();` again. All tests assume the default `STRICT_TRANS_TABLES` sql_mode, which is MySQL 8's factory default.
 
 ## 13. ❓ The questions it answers
 
-The schema was designed *before* the queries, so every business question reads like a plain sentence. These run once seed data exists (the smoke test from [§12](#12--try-to-break-it) is enough for some of them) — expand each group to see the SQL. The full query set is Jashan's work package and will land here with the final update (see [§1](#1--project-status)).
+The schema was designed *before* the queries, so every business question reads like a plain sentence. The seed from [§11](#11--running-it) step 3 is enough to run all of these right now — expand each group to see the demo SQL. The questions are posed here (everyday demos below, the curated set in [§13.1](#131-the-curated-set--who-did-what-and-where-the-screenshots-go), the three unique questions in [§13.2](#132-the-three-unique-questions--beyond-the-assignment)); **the answers live in a file**: [`docs/ANSWERS.md`](docs/ANSWERS.md) — every question's exact expected result on the loaded seed, computed by replaying the seed, not guessed. (The dormant-accounts demo has a known semantics wrinkle on the seed — untouched fixed deposits count as dormant — handled honestly in the answers file and the seed's self-check.) Q1–Q7 of the curated set are done and live in `queries/query.sql`; Q8–Q10 land with the final update (see [§1](#1--project-status)).
 
 <details>
 <summary><b>🏦 Everyday banking</b> — customer 360, multi-account holders, dormant accounts, branch league table</summary>
@@ -493,7 +507,8 @@ HAVING COUNT(*) <> 2;
 
 ```sql
 -- Overdue instalments (business question Q7): derived, never stored (D6);
--- idx_payment_due keeps this scan off a full table read
+-- idx_payment_due keeps this scan off a full table read.
+-- The exact expected row counts on the seed: docs/ANSWERS.md Part A
 SELECT lp.loan_id, lp.instalment_no, lp.due_date, lp.amount, c.full_name AS borrower
 FROM loan_payments lp
 JOIN loans l     ON l.loan_id = lp.loan_id
@@ -523,35 +538,72 @@ HAVING COUNT(*) >= 2;
 ```
 </details>
 
+### 13.1 The curated set — who did what, and where the screenshots go
+
+Q1–Q7 are done — everyone except Aryan has landed their questions, and they live in `queries/query.sql`. Aryan's Q8–Q10 close the set with the final update. **The questions are listed here; the answers live in a file** — [`docs/ANSWERS.md` · Part A](docs/ANSWERS.md#part-a-the-curated-business-questions-q1-to-q10) holds every question's expected result on the loaded seed, and the Q numbers below link straight to them. Each question also gets exactly one result screenshot, captured on the loaded seed and dropped into `docs/screenshots/queries/` under the exact name in the last column — the table *is* the placeholder checklist:
+
+| Q | The question | Owner | Result screenshot |
+|---|---|---|---|
+| [Q1](docs/ANSWERS.md#q1-customers-holding-more-than-one-account) | Customers holding more than one account | Harsita | `docs/screenshots/queries/q01_result.png` |
+| [Q2](docs/ANSWERS.md#q2-branch-league-table--deposits-by-branch) | Branch league table — deposits by branch | Thanmiksha | `docs/screenshots/queries/q02_result.png` |
+| [Q3](docs/ANSWERS.md#q3-text-in-queriesquerysql) | *(text in `queries/query.sql`)* | Jashan | `docs/screenshots/queries/q03_result.png` |
+| [Q4](docs/ANSWERS.md#q4-dormant-accounts--open-never-transacted) | Dormant accounts — open, never transacted | Ganga | `docs/screenshots/queries/q04_result.png` |
+| [Q5](docs/ANSWERS.md#q5-text-in-queriesquerysql) | *(text in `queries/query.sql`)* | Amruta | `docs/screenshots/queries/q05_result.png` |
+| [Q6](docs/ANSWERS.md#q6-text-in-queriesquerysql) | *(text in `queries/query.sql`)* | Jashan | `docs/screenshots/queries/q06_result.png` |
+| [Q7](docs/ANSWERS.md#q7-overdue-instalments--derived-never-stored) | Overdue instalments — derived, never stored | Thanmiksha | `docs/screenshots/queries/q07_result.png` |
+| Q8 | *(pending — Aryan)* | Aryan | `docs/screenshots/queries/q08_result.png` |
+| Q9 | *(pending — Aryan)* | Aryan | `docs/screenshots/queries/q09_result.png` |
+| Q10 | *(pending — Aryan)* | Aryan | `docs/screenshots/queries/q10_result.png` |
+
+**How to capture:** load the DDL + seed ([§11](#11--running-it)), run the query in MySQL Workbench, screenshot the result grid, name it exactly as above, commit. The expected answer for every question is in `docs/ANSWERS.md` — the seed is deterministic, so if a screenshot disagrees with it, it is the query that differs, not the data.
+
+### 13.2 The three unique questions — beyond the assignment
+
+Three questions of our own, past the assigned set. Each one needs a MySQL 8 capability that none of the ten assigned questions ever touches — a recursive CTE, a ranking window function, and a logarithmic audit screen — and each has an exact expected answer on the seed, so all three can be demonstrated live. The runnable SQL is in [`queries/bonus_queries.sql`](queries/bonus_queries.sql) (expected results in comments next to every query); the answers — exact result grids and how to read them — are in [`docs/ANSWERS.md` · Part B](docs/ANSWERS.md#part-b-the-three-unique-questions-b1-to-b3).
+
+**B1 · The org chart, unrolled** — *a recursive CTE walking the self-referencing `MANAGES` foreign key.* How deep does the reporting line actually go, and who sits at each depth? A plain self-join answers "who reports to whom" one level deep; walking an arbitrary depth needs `WITH RECURSIVE` — and the same query handles any org-chart shape without modification.
+
+**B2 · Dominance, or spike?** — *a ranking window function auditing a GROUP BY's conclusion.* The branch league table (Q2) crowns Branch 1 — but was it ahead every month, or did a few explosive months carry it? One leaderboard per month (`RANK() OVER (PARTITION BY month ORDER BY deposits DESC)`), rank 1 only — twelve monthly champions instead of one yearly one.
+
+**B3 · The Benford screen** — *the first-digit test used in fraud analytics.* Real transaction amounts follow Benford's law — the chance of leading digit *d* is log₁₀(1 + 1/d) — so amounts starting with 1 should be about 30% and with 9 about 5%. Fabricated, formula-built amounts deviate. Where do our 552 amounts land?
+
+Screenshot slots for these three live alongside the others: `docs/screenshots/queries/b1_result.png`, `b2_result.png`, `b3_result.png`.
+
 The full query-to-design-feature map is in the data dictionary §15.
 
 ## 14. ✅ How the design was verified
 
 We didn't leave checking to the end — these are the checks that were actually run:
 
-- **DDL executed and probed** — the script runs clean; every CHECK/FK rule was deliberately violated to confirm the engine rejects it (the §12 table is that suite, distilled).
-- **Counts cross-checked** — 9 tables · 57 columns · 10 FK · 8 CHECK · 7 UNIQUE · 3 indexes, read back from `information_schema` ([§11](#11--running-it) queries) and reconciled against every document that states them.
+- **DDL executed and probed** — the script (v2.1) runs clean on MySQL 8.0.16+; every CHECK/FK/trigger rule was deliberately violated to confirm the engine rejects it (the §12 table is that suite, distilled). Getting here took one real implementation fix — v2.1 below.
+- **Counts cross-checked** — 9 tables · 57 columns · 10 FK · 8 CHECK · 7 UNIQUE · 3 indexes · 2 triggers, read back from `information_schema` ([§11](#11--running-it) queries) and reconciled against every document that states them.
 - **Diagram ⇔ dictionary ⇔ DDL** — the 9 table cards on the schema diagrams, the 9 sections of the dictionary and the 9 `CREATE TABLE` statements are three views of the same inventory; each pair was checked against the other.
 - **`beneficiaries` has exactly one FK** — the "missing" second one is decision D3, verified as deliberate, not an oversight.
 - **No `FLOAT`/`DOUBLE` anywhere** in the DDL; every money column is `DECIMAL`.
 - **No `is_overdue`/`age`/`outstanding_amount` column exists** anywhere — D6 verified by absence.
+- **The normalization proof is executable** — [`queries/normalization_proof.sql`](queries/normalization_proof.sql) re-runs all eleven checks (1NF → BCNF) with expected results in comments; the screenshots are in [`docs/screenshots/`](docs/screenshots), walked through in the normalization doc §9.
+- **Every published answer was computed, not estimated** — the expected results collected in [`docs/ANSWERS.md`](docs/ANSWERS.md) (the curated set, the three unique questions and the eleven proof checks) were derived by replaying the deterministic seed against each query, so the answers and the data cannot drift apart.
+- **The seed was reviewed before it shipped** — every `INSERT`'s column list was checked against its `SELECT` (the shape check that would have caught v1.0's error 1136 below), and all 3,242 rows were replayed against every DDL rule: 0 constraint violations, transfers reconcile 30/30, and the self-check counts (200/200/200/250/552/200/1200/200/240) hold.
 
-**The v2 corrections — what review actually caught.** The first version of the DDL had two defects, and we kept a note of both instead of quietly patching them:
+**The corrections log — what review and implementation actually caught.** The first version of the DDL had two defects, v2 itself had one more that only showed up when it ran on a real server, the seed's first upload had one of its own, and the first v2.1 *upload* briefly shipped the pre-review draft. All five are written down where they happened instead of being quietly patched:
 
-1. **`chk_payment_dates` (`paid_date >= due_date`) was removed.** It sounded defensive, but it rejects *early* EMI payments, which are completely normal banking. There is now deliberately **no** date-order check between those columns — early, on-time and late are all legitimate.
-2. **`idx_accounts_customer` was removed.** It duplicated the index InnoDB creates automatically for that foreign key — a duplicate index taxes every write and buys nothing. It became the standing rule: never explicitly index an FK column.
+1. **`chk_payment_dates` (`paid_date >= due_date`) was removed** (v2). It sounded defensive, but it rejects *early* EMI payments, which are completely normal banking. There is now deliberately **no** date-order check between those columns — early, on-time and late are all legitimate.
+2. **`idx_accounts_customer` was removed** (v2). It duplicated the index InnoDB creates automatically for that foreign key — a duplicate index taxes every write and buys nothing. It became the standing rule: never explicitly index an FK column.
+3. **`chk_emp_not_own_manager` became two triggers** (v2.1, caught by Ganga while bringing the DDL up on MySQL). MySQL 8 refuses to create a CHECK constraint on a column that a foreign key referential action uses — error **3823** on `manager_id` / `fk_emp_manager` — so the *same rule* is now enforced by `trg_emp_not_own_manager_ins` / `_upd` with `SIGNAL SQLSTATE '45000'`, and a violation fails with error **1644** instead of 3819. The rule name is kept in the error message so the docs still cross-reference. (Cascaded FK actions never fire triggers, which is safe here — the only cascade touching `manager_id` sets it to NULL.) The lesson we keep from this one: the rule was never the problem; the *mechanism* was, and the fix stays inside the database.
+4. **The seed's first `INSERT` miscounted its columns** (v1.1, caught the moment v1.0 ran on MySQL: error **1136** — the `branches` INSERT listed 4 columns but its `SELECT` produced only 3 values, because the city existed only inside the name `CONCAT`). The fix gave the city its own `SELECT` item, and the count comments were corrected in the same pass (552 transactions / 3,242 rows). Same lesson as §12, one layer up: a script is verified by *running* it — and every `INSERT`'s shape is now checked before anything ships.
+5. **The first v2.1 *upload* wasn't the reviewed file** (caught by Amruta while verifying the repository on MySQL: ERROR **1064** — the uploaded draft had `DELIMITER $$` sharing a line with `CREATE TRIGGER`, and the mysql client takes the rest of that line as the delimiter string, so neither trigger was created and `SHOW TRIGGERS` came back empty). The reviewed v2.1-final had already fixed exactly this — every `DELIMITER` on its own line, as the NOTE in the DDL warns — so the repair was simply uploading the right file. Lesson: what gets merged *is* the deliverable — verify the artifact, not the intention.
 
 **Sync contract.** The DDL is the source of truth; if it ever changes, `DATABASE_DESIGN.md`, `NORMALIZATION.md`, `DATA_DICTIONARY.md` and the schema diagrams are regenerated with it, so the proof and the schema are never allowed to disagree.
 
 ## 15. 🚧 Scope, limits and next steps
 
-**In this repository:** requirements → conceptual ER (Chen) → logical relational mapping → physical DDL with full integrity; normalization to BCNF with proofs; six diagrams; column-level data dictionary; verification suite (§11–§12); an honest design log.
+**In this repository:** requirements → conceptual ER (Chen) → logical relational mapping → physical DDL with full integrity; a deterministic 3,242-row seed with its own self-check; normalization to BCNF with proofs — argued *and* executed as SQL; six diagrams; column-level data dictionary; verification suite (§11–§12); an honest design log.
 
-**Deliberately outside scope (for now):** seed/demo data (a separate work package — Harsita), the application layer, stored procedures and triggers, and access control.
+**Deliberately outside scope (for now):** the application layer, stored procedures, triggers beyond the one rule that needs them, and access control.
 
-**Known limitations, all deliberate and documented where they apply:** no joint accounts (an `account_holders` junction would be the M:N upgrade path); `dob` can't be CHECK-constrained to the past because MySQL forbids non-deterministic functions in CHECK (application-layer responsibility, noted in the DDL); card PANs are stored in plaintext in this demo — production would store a hash plus last four; the *atomicity* of a transfer's two inserts is an insert-routine responsibility, with the §13 reconciliation query as the after-the-fact guard; `accounts.balance` is stored rather than derived (documented deviation, §10) the self-manager rule is enforced by triggers, which stop a row from managing itself but do not detect longer loops (A→B→A)..
+**Known limitations, all deliberate and documented where they apply:** no joint accounts (an `account_holders` junction would be the M:N upgrade path); `dob` can't be CHECK-constrained to the past because MySQL forbids non-deterministic functions in CHECK (application-layer responsibility, noted in the DDL); card PANs are stored in plaintext in this demo — production would store a hash plus last four; the *atomicity* of a transfer's two inserts is an insert-routine responsibility, with the §13 reconciliation query as the after-the-fact guard; `accounts.balance` is stored rather than derived (documented deviation, §10).
 
-**Next steps, in the order we'd do them:** seed data and the full demo query set; views (`v_overdue`, `v_account_statement`); a stored procedure `sp_transfer` that inserts both halves of a transfer in one transaction; audit triggers; date-based partitioning for `transactions`; role-based access (teller vs loan officer vs auditor).
+**Next steps, in the order we'd do them:** Aryan's Q8–Q10 to finish the curated query set, plus the result screenshots ([§13.1](#131-the-curated-set--who-did-what-and-where-the-screenshots-go)); views (`v_overdue`, `v_account_statement`); a stored procedure `sp_transfer` that inserts both halves of a transfer in one transaction; audit triggers; date-based partitioning for `transactions`; role-based access (teller vs loan officer vs auditor).
 
 ## 16. 👥 Team and contributions
 
@@ -559,17 +611,16 @@ How Team 3 splits the work — the consolidated assignment. Each member owns spe
 
 | Member | Responsibilities | Assigned queries | Artifacts in this repository |
 |---|---|---|---|
-| **Aryan Rao** (AU25UG-006) | E-R diagram, normalization, database design constraints | Q8, Q9, Q10 — done | [`schema/create_tables.sql`](schema/create_tables.sql) — the DDL and its 34 named constraints; all six [diagrams](diagrams/); the [`docs/`](docs) write-ups including the [answers file](docs/ANSWERS.md); [`queries/aryan_queries.sql`](queries/aryan_queries.sql) — his Q8–Q10 closing the curated set; [`queries/normalization_proof.sql`](queries/normalization_proof.sql) with its 11 result screenshots; and [`queries/bonus_queries.sql`](queries/bonus_queries.sql) — the three unique questions |
+| **Aryan Rao** (AU25UG-006) | E-R diagram, normalization, database design constraints | Q8, Q9, Q10 — pending | [`schema/create_tables.sql`](schema/create_tables.sql) — the DDL and its 34 named constraints; all six [diagrams](diagrams/); the [`docs/`](docs) write-ups including the [answers file](docs/ANSWERS.md); [`queries/normalization_proof.sql`](queries/normalization_proof.sql) with its 11 result screenshots, and [`queries/bonus_queries.sql`](queries/bonus_queries.sql) — the three unique questions |
 | **Harsita** (AU25UG-019) | Sample data | Q1 — done | [`data/insert_data.sql`](data/insert_data.sql) v1.1 — the 3,242-row deterministic demo dataset with its self-check |
-| **Thammiksha** ("Thammi") | README, report, 10 test cases | Q2, Q7 — done | the README's final revision, the report and the test-case sheets — in progress, landing with the final update ([§1](#1--project-status)) |
+| **Thanmiksha** ("Thani") | README, report, 10 test cases | Q2, Q7 — done | the README's final revision, the report and the test-case sheets — in progress, landing with the final update ([§1](#1--project-status)) |
 | **Jashan** | GitHub repository setup & management, README, 10 test cases | Q3, Q6 — done | this repository itself — its structure, curation and pull-request flow — plus the test-case sheets (in progress, [§1](#1--project-status)) |
 | **Ganga Siva Kumar Reddy** ("Shiva") | Database creation | Q4 — done | the v2.1 implementation fix (CHECK → trigger, MySQL error 3823, [§14](#14--how-the-design-was-verified)) + the verification runs that confirmed the stack works on a live server |
-| **Amruta Nagavi** ("Amruta") | Verification, report, README | Q5 — done | the design-review pass that produced DDL v2, plus the upload verification that caught the v2.1 draft mix-up — both in [§14](#14--how-the-design-was-verified) |
+| **Amruta Nagavi** ("Amrita") | Verification, report, README | Q5 — done | the design-review pass that produced DDL v2, plus the upload verification that caught the v2.1 draft mix-up — both in [§14](#14--how-the-design-was-verified) |
 
-The Q-numbers refer to the team's ten assigned business questions — all ten are done: Q1–Q7 live in `queries/query.sql` and Aryan's Q8–Q10 in `queries/aryan_queries.sql`, each mapped to its owner and its result-screenshot slot in [§13.1](#131-the-curated-set--who-did-what-and-where-the-screenshots-go). The negative-test table in [§12](#12--try-to-break-it) is the distilled verification suite the formal test-case sheets build on.
+The Q-numbers refer to the team's ten assigned business questions — Q1–Q7 are done and live in `queries/query.sql`, each mapped to its owner and its result-screenshot slot in [§13.1](#131-the-curated-set--who-did-what-and-where-the-screenshots-go); Q8–Q10 close the set with the final update. The negative-test table in [§12](#12--try-to-break-it) is the distilled verification suite the formal test-case sheets build on.
 
 *Note from Aryan:* the schema and every document in `docs/` are my work, and the mistakes v1 and v2 contained were mine too — which is why the corrections log in [§14](#14--how-the-design-was-verified) is written down where things happened instead of being quietly patched. Amruta's review and Ganga's implementation run each caught one, and the seed's first real run caught its own — which is exactly what review, and actually running things, is for.
-
 
 ## 17. 📖 References
 

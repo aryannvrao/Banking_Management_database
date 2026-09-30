@@ -32,40 +32,88 @@ These are the team's ten assigned questions, split across the six of us per [REA
 
 **Answer: 50 customers.** The seed registers 200 customers holding 250 accounts — 150 hold exactly one account, and the remaining 50 hold two. The query groups `accounts` by `customer_id` and keeps the groups with `HAVING COUNT(*) > 1`; the expected result grid is 50 rows of *(full name, accounts held = 2)*.
 
+### Perfect. Based on **your actual MySQL output**, write Q2 like this:
+
 ### Q2. Branch league table — deposits by branch
 
-**Owner:** Thanmiksha · **Screenshot slot:** `docs/screenshots/queries/q02_result.png`
+**Owner:** Thammiksha · **Screenshot slot:** `docs/screenshots/queries/q02_result.png`
 
-**Answer: Branch 1 leads with ₹83.92 lakh in deposits — 5.4× the runner-up.** The top of the league table:
+**Answer:** **Main Road Branch, Bengaluru** manages the highest deposits with **₹83.92 lakh** in total deposits.
 
-| Rank | Branch | Total deposits (₹) |
-|---|---|---|
-| 1 | Branch 1 | 8,392,051 |
-| 2 | Branch 13 | 1,546,962 |
-| 3 | Branch 8 | 1,424,027 |
+| Rank | Branch                      | Total deposits (₹) |
+| ---- | --------------------------- | -----------------: |
+| 1    | Main Road Branch, Bengaluru |       8,392,051.00 |
 
-One measurement note worth having ready for the viva: if the league is measured on *stored balances* (`SUM(a.balance)`) instead of *deposit transactions*, Branch 1 still leads but by 4.5× (₹2.38 crore vs ₹52.63 lakh) — the 5.4× figure is the deposit basis, which is what the question asks. The two bases legitimately differ because balances move with withdrawals and transfers too.
+**Conclusion:** Main Road Branch, Bengaluru has the highest total deposits of **₹83.92 lakh**.
 
-### Q3. *(text in `queries/query.sql`)*
+### Q3. Average account balance by branch
 
 **Owner:** Jashan · **Screenshot slot:** `docs/screenshots/queries/q03_result.png`
 
-The question text and SQL are Jashan's, in `queries/query.sql`. Its expected result joins this file with the screenshot when it is captured.
+**Answer:** The average account balance varies across branches, with **Main Road Branch, Bengaluru** having the highest average account balance of **₹19,83,345.50** among the displayed branches.
 
-### Q4. Dormant accounts — open, never transacted
+| Branch ID | Branch                              | Average balance (₹) |
+| --------: | ----------------------------------- | ------------------: |
+|         1 | Main Road Branch, Bengaluru         |        1,983,345.50 |
+|         4 | Riverside Branch, Hubballi          |          455,063.50 |
+|         5 | Market Branch, Chamundi             |          462,982.50 |
+|         6 | Central Branch, Coimbatore          |          470,901.50 |
+|         7 | Tech Park Branch, Madurai           |          478,820.50 |
+|         8 | Old Town Branch, Salem              |          486,739.50 |
+|         9 | Main Road Branch, Erode             |          494,658.50 |
+|        10 | City Centre Branch, Mumbai          |          502,577.50 |
+|        11 | Industrial Estate Branch, Pune      |          510,496.50 |
+|        12 | Riverside Branch, Nagpur            |          518,415.50 |
+|        13 | Market Branch, Nashik               |          526,334.50 |
+|        14 | Central Branch, Thane               |          439,753.50 |
+|        15 | Tech Park Branch, New Delhi         |          447,672.50 |
+|        16 | Old Town Branch, Gurugram           |          453,543.60 |
+|        17 | Main Road Branch, Noida             |          460,770.70 |
+|        18 | City Centre Branch, Ghaziabad       |          467,997.80 |
+|        19 | Industrial Estate Branch, Hyderabad |          475,224.90 |
+|        20 | Riverside Branch, Warangal          |          387,452.00 |
 
-**Owner:** Ganga · **Screenshot slot:** `docs/screenshots/queries/q04_result.png`
+**Conclusion:** Based on the displayed result, **Main Road Branch, Bengaluru has the highest average account balance at ₹19.83 lakh**.
 
-**Answer: 46 accounts** — a `LEFT JOIN transactions` that keeps the rows where `txn_id IS NULL`:
 
-| Account type | Dormant | Of which engineered dormant |
-|---|---|---|
-| fixed_deposit | 38 | 2 |
-| savings | 6 | 6 |
-| current | 2 | 2 |
-| **Total** | **46** | **10** |
+### Q4. Yes, this is the **actual output for Q4 — customers with no transactions**. Based on the result shown in your screenshot, write it like this:
 
-The honest note, because it will be asked: the seed deliberately engineered 10 dormant accounts (241–250), but 36 fixed deposits land in the same result — FDs never take teller traffic by design, so the `LEFT JOIN` sees them as "never transacted". Whether an untouched FD should count as *dormant* is a business-semantics question, flagged in the seed's own self-check; the count 46 is correct for the query as posed.
+### Q4. Customers with no transactions
+
+**Owner:** siva · **Screenshot slot:** `docs/screenshots/queries/q04_result.png`
+
+**Answer:** The query identifies customers who have **no transaction records associated with any of their accounts** by using `LEFT JOIN` and filtering for missing transaction IDs.
+
+| Customer ID | Customer        |
+| ----------: | --------------- |
+|           3 | Deepa Nayak     |
+|           7 | Meera Desai     |
+|           8 | Naveen Joshi    |
+|           9 | Rekha Sheikh    |
+|          13 | Kavya Khanna    |
+|          15 | Nidhi Rao       |
+|          17 | Chaitra Agarwal |
+|          18 | Karthik Shah    |
+|          23 | Priya Krishnan  |
+|          24 | Rohit Kapoor    |
+|          25 | Ishita Shenoy   |
+|          27 | Archana Bose    |
+|          35 | Ananya Malhotra |
+|          39 | Sunitha Yadav   |
+|          45 | Geetha Das      |
+|          55 | Nidhi Menon     |
+|          59 | Lakshmi Shetty  |
+|          69 | Sneha Sharma    |
+|          75 | Ananya Bansal   |
+|          79 | Sunitha Singh   |
+|          89 | Rekha Sinha     |
+|          99 | Lakshmi Hegde   |
+|         105 | Ishita Desai    |
+|         115 | Ananya Agarwal  |
+|         119 | Sunitha Kaur    |
+
+**Conclusion:** These customers have **no transactions recorded against their accounts** in the database.
+
 
 ### Q5. *(text in `queries/query.sql`)*
 
@@ -73,25 +121,56 @@ The honest note, because it will be asked: the seed deliberately engineered 10 d
 
 The question text and SQL are Amruta's, in `queries/query.sql`. Its expected result joins this file with the screenshot when it is captured.
 
-### Q6. *(text in `queries/query.sql`)*
+### Q6.### Q6. Customers with active loans
 
-**Owner:** Jashan · **Screenshot slot:** `docs/screenshots/queries/q06_result.png`
+**Owner:** jashan· **Screenshot slot:** `docs/screenshots/queries/q06_result.png`
 
-The question text and SQL are Jashan's, in `queries/query.sql`. Its expected result joins this file with the screenshot when it is captured.
+**Answer:** The query identifies customers who currently have **active loans**, along with their loan type and principal amount.
 
-### Q7. Overdue instalments — derived, never stored
+| Customer ID | Customer           | Loan ID | Loan Type | Principal (₹) |
+| ----------: | ------------------ | ------: | --------- | ------------: |
+|           4 | Prakash Nair       |       1 | Vehicle   |        53,571 |
+|           7 | Meera Desai        |       2 | Personal  |        57,142 |
+|          10 | Mohan Singh        |       3 | Education |        60,713 |
+|          16 | Dinesh Das         |       5 | Vehicle   |        67,855 |
+|          19 | Lakshmi Kulkarni   |       6 | Personal  |        71,426 |
+|          22 | Ravi Patel         |       7 | Education |        74,997 |
+|          28 | Ajay Chauhan       |       9 | Vehicle   |        82,139 |
+|          31 | Pooja Sinha        |      10 | Personal  |        85,710 |
+|          34 | Murali Subramanian |      11 | Education |        89,281 |
+|          40 | Arjun Iyer         |      13 | Vehicle   |        96,423 |
 
-**Owner:** Thanmiksha · **Screenshot slot:** `docs/screenshots/queries/q07_result.png`
+**Conclusion:** The query successfully returns customers whose loan status is **`active`**, together with their corresponding loan details.
 
-**Answer: 71 rows** — instalments with `paid_date IS NULL AND due_date < CURRENT_DATE`:
 
-| Loan status | Overdue instalments |
-|---|---|
-| active | 16 |
-| defaulted | 55 |
-| **Total** | **71** |
 
-The count is date-stable: the newest unpaid due date anywhere in the seed is **2026-07-09**, already in the past, so the answer no longer moves with the calendar. This is decision D6 in action — there is no `is_overdue` column; the truth is derived at query time (`idx_payment_due` keeps it off a full table read).
+### Q7. Overdue loan payments
+
+**Owner:** Thammiksha · **Screenshot slot:** `docs/screenshots/queries/q07_result.png`
+
+**Answer:** The database contains **15 overdue loan payments**. These payments have a `NULL` paid date and a due date earlier than the current date.
+
+| Payment ID | Loan ID | Instalment No. | Due Date   | Paid Date | Amount (₹) |
+| ---------: | ------: | -------------: | ---------- | --------- | ---------: |
+|         99 |      17 |              3 | 2025-08-29 | NULL      |   2,121.88 |
+|        507 |      85 |              3 | 2025-09-03 | NULL      |   6,776.09 |
+|        915 |     153 |              3 | 2025-09-07 | NULL      |  11,430.29 |
+|        100 |      17 |              4 | 2025-09-29 | NULL      |   2,121.88 |
+|        508 |      85 |              4 | 2025-10-03 | NULL      |   6,776.09 |
+|        916 |     153 |              4 | 2025-10-07 | NULL      |  11,430.29 |
+|        101 |      17 |              5 | 2025-10-29 | NULL      |   2,121.88 |
+|        509 |      85 |              5 | 2025-11-03 | NULL      |   6,776.09 |
+|        376 |      63 |              4 | 2025-11-06 | NULL      |   6,587.89 |
+|        917 |     153 |              5 | 2025-11-07 | NULL      |  11,430.29 |
+|        102 |      17 |              6 | 2025-11-29 | NULL      |   2,121.88 |
+|        510 |      85 |              6 | 2025-12-03 | NULL      |   6,776.09 |
+|        918 |     153 |              6 | 2025-12-07 | NULL      |  11,430.29 |
+|        535 |      90 |              1 | 2026-03-25 | NULL      |  11,863.85 |
+|        808 |     135 |              4 | 2026-06-10 | NULL      |  12,747.87 |
+|        268 |      45 |              4 | 2026-07-09 | NULL      |   4,038.32 |
+
+**Conclusion:** The query identifies loan payments that are **past their due date and still unpaid (`paid_date IS NULL`)**, which are treated as overdue in the FinCore database.
+
 
 ### Q8. Where do our customers send money? — the payee bank split
 

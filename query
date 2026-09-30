@@ -1,4 +1,23 @@
 -- ============================================================================
+Query 2: Which branch manages the highest deposits? 
+Concepts  : JOIN,SUM,ORDERBY,LIMIT
+-- ============================================================================
+USE fincore;
+
+SELECT
+    b.branch_id,
+    b.name AS branch_name,
+    SUM(t.amount) AS total_deposits
+FROM branches b
+JOIN accounts a
+    ON b.branch_id = a.branch_id
+JOIN transactions t
+    ON a.account_id = t.account_id
+WHERE t.txn_type = 'deposit'
+GROUP BY b.branch_id, b.name
+ORDER BY total_deposits DESC
+LIMIT 1; 
+-- ============================================================================
 -- Q4 · Which customers have no transactions?
 -- Concepts:  A customer counts only if NONE of their
 -- accounts has ever transacted.
@@ -15,3 +34,25 @@ LEFT JOIN accounts a
 LEFT JOIN transactions t
     ON a.account_id = t.account_id
 WHERE t.txn_id IS NULL;
+
+-- ============================================================================
+Query 7:Which loan payments are overdue? 
+Concepts : Datecomparison,NULLhandling 
+-- ============================================================================
+USE fincore;
+
+SELECT
+    lp.payment_id,
+    lp.loan_id,
+    c.full_name,
+    lp.instalment_no,
+    lp.due_date,
+    lp.amount
+FROM loan_payments lp
+JOIN loans l
+    ON lp.loan_id = l.loan_id
+JOIN customers c
+    ON l.customer_id = c.customer_id
+WHERE lp.paid_date IS NULL
+  AND lp.due_date < CURRENT_DATE
+ORDER BY lp.due_date;

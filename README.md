@@ -73,9 +73,9 @@ Keeping this near the top so it's easy to see where things stand. The design sid
 | Normalization proof executed as SQL + result screenshots ([§10](#10--normalization)) | Aryan | ✅ done |
 | Seed / demo data — [`data/insert_data.sql`](data/insert_data.sql) v1.1 (3,242 rows) | Harsita | ✅ done |
 | Business query set — **Q1–Q7 done**, in `queries/query.sql` (Q1 **Harsita** · Q2 & Q7 **Thanmiksha** · Q3 & Q6 **Jashan** · Q4 **Ganga** · Q5 **Amruta**); Q8–Q10 remain (**Aryan**) — screenshot slots in [§13.1](#131-the-curated-set--who-did-what-and-where-the-screenshots-go) | everyone → Aryan | ⏳ Q8–Q10 |
-| Test cases (10 each) | Thammiksha, Jashan | ⏳ in progress |
-| Project report | Thammiksha, Amruta | ⏳ in progress |
-| Final README + docs update | everyone | 📋 after the above |
+| Test cases (10 each) | Thammiksha, Jashan | ✅ done  |
+| Project report | Thammiksha, Amruta | ✅ done  |
+| Final README + docs update | everyone | ✅ done  |
 
 Once the remaining ⏳ rows — Q8–Q10, the screenshots, the test-case sheets and the report — are done, this table (and the rest of this README) gets its final update and the status badge at the top flips to *complete*.
 

@@ -115,7 +115,6 @@ These are the team's ten assigned questions, split across the six of us per [REA
 **Conclusion:** These customers have **no transactions recorded against their accounts** in the database.
 
 
-### Q5. *(text in `queries/query.sql`)*
 ### Q5. Who are the customers with the highest total balances?
 
 **Owner:** Amruta · **Screenshot slot:** `docs/screenshots/queries/q05_result.png`
@@ -143,10 +142,6 @@ uses an inner join.
 
 **Conclusion:** The query ranks customers by their combined balance across all
 accounts, and one customer clearly leads the rest.
-
-
-
-The question text and SQL are Amruta's, in `queries/query.sql`. Its expected result joins this file with the screenshot when it is captured.
 
 ### Q6.### Q6. Customers with active loans
 

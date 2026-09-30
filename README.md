@@ -16,7 +16,7 @@ A DBMS course project · Team 3 · Atria University
 [![Normalized](https://img.shields.io/badge/normalized-BCNF-6B46C1)](docs/NORMALIZATION.md)
 [![Status](https://img.shields.io/badge/status-in_progress-F59E0B)](#1--project-status)
 
-Database design & DDL: **Aryan Rao** (AU25UG-006) · Design review: **Amruta Nagavi** · Implementation runs: **Ganga Siva Kumar Reddy** · Seed data: **Harsita** (AU25UG-019)
+Database design & DDL: **Aryan Rao** (AU25UG-006) · Design review: **Amruta Nagavi** · Implementation runs: **Ganga Siva Kumar Reddy** · Seed data: **Harsita** (AU25UG-019) . Test cases, Readme, Report : **Thammiksah,Jashan** 
 
 </div>
 
@@ -73,8 +73,8 @@ Keeping this near the top so it's easy to see where things stand. The design sid
 | Normalization proof executed as SQL + result screenshots ([§10](#10--normalization)) | Aryan | ✅ done |
 | Seed / demo data — [`data/insert_data.sql`](data/insert_data.sql) v1.1 (3,242 rows) | Harsita | ✅ done |
 | Business query set — **Q1–Q7 done**, in `queries/query.sql` (Q1 **Harsita** · Q2 & Q7 **Thanmiksha** · Q3 & Q6 **Jashan** · Q4 **Ganga** · Q5 **Amruta**); Q8–Q10 remain (**Aryan**) — screenshot slots in [§13.1](#131-the-curated-set--who-did-what-and-where-the-screenshots-go) | everyone → Aryan | ⏳ Q8–Q10 |
-| Test cases (10 each) | Thanmiksha, Jashan | ⏳ in progress |
-| Project report | Thanmiksha, Amruta | ⏳ in progress |
+| Test cases (10 each) | Thammiksha, Jashan | ⏳ in progress |
+| Project report | Thammiksha, Amruta | ⏳ in progress |
 | Final README + docs update | everyone | 📋 after the above |
 
 Once the remaining ⏳ rows — Q8–Q10, the screenshots, the test-case sheets and the report — are done, this table (and the rest of this README) gets its final update and the status badge at the top flips to *complete*.
@@ -545,12 +545,12 @@ Q1–Q7 are done — everyone except Aryan has landed their questions, and they 
 | Q | The question | Owner | Result screenshot |
 |---|---|---|---|
 | [Q1](docs/ANSWERS.md#q1-customers-holding-more-than-one-account) | Customers holding more than one account | Harsita | `docs/screenshots/queries/q01_result.png` |
-| [Q2](docs/ANSWERS.md#q2-branch-league-table--deposits-by-branch) | Branch league table — deposits by branch | Thanmiksha | `docs/screenshots/queries/q02_result.png` |
+| [Q2](docs/ANSWERS.md#q2-branch-league-table--deposits-by-branch) | Branch league table — deposits by branch | Thammiksha | `docs/screenshots/queries/q02_result.png` |
 | [Q3](docs/ANSWERS.md#q3-text-in-queriesquerysql) | *(text in `queries/query.sql`)* | Jashan | `docs/screenshots/queries/q03_result.png` |
 | [Q4](docs/ANSWERS.md#q4-dormant-accounts--open-never-transacted) | Dormant accounts — open, never transacted | Ganga | `docs/screenshots/queries/q04_result.png` |
 | [Q5](docs/ANSWERS.md#q5-text-in-queriesquerysql) | *(text in `queries/query.sql`)* | Amruta | `docs/screenshots/queries/q05_result.png` |
 | [Q6](docs/ANSWERS.md#q6-text-in-queriesquerysql) | *(text in `queries/query.sql`)* | Jashan | `docs/screenshots/queries/q06_result.png` |
-| [Q7](docs/ANSWERS.md#q7-overdue-instalments--derived-never-stored) | Overdue instalments — derived, never stored | Thanmiksha | `docs/screenshots/queries/q07_result.png` |
+| [Q7](docs/ANSWERS.md#q7-overdue-instalments--derived-never-stored) | Overdue instalments — derived, never stored | Thammiksha | `docs/screenshots/queries/q07_result.png` |
 | Q8 | *(pending — Aryan)* | Aryan | `docs/screenshots/queries/q08_result.png` |
 | Q9 | *(pending — Aryan)* | Aryan | `docs/screenshots/queries/q09_result.png` |
 | Q10 | *(pending — Aryan)* | Aryan | `docs/screenshots/queries/q10_result.png` |

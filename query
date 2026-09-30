@@ -40,6 +40,7 @@ WHERE t.txn_id IS NULL;
 -- Concepts:  SUM across accounts, ranking  
 -- ============================================================================
 use fincore;
+
 select
     c.customer_id,
     c.full_name,

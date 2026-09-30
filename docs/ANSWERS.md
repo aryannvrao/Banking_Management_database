@@ -26,7 +26,8 @@ One convention throughout: a *screenshot slot* is the exact path where that ques
 
 These are the team's ten assigned questions, split across the six of us per [README §16](../README.md#16--team-and-contributions). The questions and their owners are listed in [README §13.1](../README.md#131-the-curated-set--who-did-what-and-where-the-screenshots-go); Q1–Q7 live in `queries/query.sql` (that file is the team's, maintained together) and Q8–Q10 are Aryan's, in [`queries/aryan_queries.sql`](../queries/aryan_queries.sql) — each following the same house rules: one plain sentence, joins only along declared foreign keys, everything time-dependent derived (D6), never stored. All ten answers are below.
 
-### Q1. Customers holding more than one account
+### Q1. Which customers have multiple accounts?
+GROUPBY,HAVINGCOUNT>1
 
 **Owner:** Harsita · **Screenshot slot:** `docs/screenshots/q01_result.png`
 
@@ -34,19 +35,20 @@ These are the team's ten assigned questions, split across the six of us per [REA
 
 ### Perfect. Based on **your actual MySQL output**, write Q2 like this:
 
-### Q2. Branch league table — deposits by branch
-
+### Q2. Which branch manages the highest deposits? 
+JOIN,SUM,ORDERBY,LIMIT
 **Owner:** Thammiksha · **Screenshot slot:** `docs/screenshots/q02_result.png`
 
 **Answer:** **Main Road Branch, Bengaluru** manages the highest deposits with **₹83.92 lakh** in total deposits.
 
-| Rank | Branch                      | Total deposits (₹) |
+| Rank | Branch                      | Total deposits (₹) | 
 | ---- | --------------------------- | -----------------: |
 | 1    | Main Road Branch, Bengaluru |       8,392,051.00 |
 
 **Conclusion:** Main Road Branch, Bengaluru has the highest total deposits of **₹83.92 lakh**.
 
-### Q3. Average account balance by branch
+### Q3. What is the average account balance by branch?
+AVG,GROUPBY
 
 **Owner:** Jashan · **Screenshot slot:** `docs/screenshots/q03_result.png`
 
@@ -76,9 +78,8 @@ These are the team's ten assigned questions, split across the six of us per [REA
 **Conclusion:** Based on the displayed result, **Main Road Branch, Bengaluru has the highest average account balance at ₹19.83 lakh**.
 
 
-### Q4. Yes, this is the **actual output for Q4 — customers with no transactions**. Based on the result shown in your screenshot, write it like this:
-
-### Q4. Customers with no transactions
+### Q4. Which customers have no transactions? 
+LEFTJOIN…ISNULL/NOTEXISTS
 
 **Owner:** siva · **Screenshot slot:** `docs/screenshots/q04_result.png`
 
@@ -143,7 +144,8 @@ uses an inner join.
 **Conclusion:** The query ranks customers by their combined balance across all
 accounts, and one customer clearly leads the rest.
 
-### Q6.### Q6. Customers with active loans
+ ### Q6. Which customers have active loans?
+ JOIN with WHERE status filter
 
 **Owner:** jashan· **Screenshot slot:** `docs/screenshots/q06_result.png`
 
@@ -166,7 +168,8 @@ accounts, and one customer clearly leads the rest.
 
 
 
-### Q7. Overdue loan payments
+### Q7. Which loan payments are over due?
+Datecomparison,NULLhandling
 
 **Owner:** Thammiksha · **Screenshot slot:** `docs/screenshots/q07_result.png`
 

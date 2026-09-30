@@ -5,7 +5,7 @@ Design cross-checked by Amruta Nagavi
 
 This page is my design write-up for the FinCore banking database: what the nine tables are,
 how they connect, and — more importantly — *why* every choice is the way it is. The SQL is
-the source of truth: [`schema/create_tables.sql`](../schema/create_tables.sql) (MySQL 8, DDL v2).
+the source of truth: [`schema/create_tables.sql`](../schema/create_tables.sql) (MySQL 8, DDL v2.1).
 A longer report with the full functional-dependency walkthroughs goes with the print
 submission; this page is the readable version of it.
 
@@ -46,9 +46,12 @@ With those rules set, nine tables fall out naturally:
 | `cards` | Debit / credit cards issued on an account | `card_id` | `account_id` |
 
 **Why exactly these nine?** Three of them — `customers`, `branches`, `employees` — are
-*master* entities: they describe things that exist in their own right, so they carry no
-foreign keys. One — `accounts` — is the hub: every operational table either points at it or
-points at something that points at it. The remaining five are *satellites*, one per business
+*master* entities: they describe things that exist in their own right, so no other table
+owns them. Two of the three (`customers`, `branches`) carry no foreign keys at all;
+`employees` does carry two links — where it sits (`branch_id`) and who it reports to
+(`manager_id`) — but those are references, not ownership. One — `accounts` — is the hub:
+every operational table either points at it or points at something that points at it. The
+remaining five are *satellites*, one per business
 domain: money movement (`transactions`), lending (`loans` and its schedule `loan_payments`),
 and payment rails (`cards`, `beneficiaries`). The test I applied for each satellite was
 simple: if I deleted it, where would its facts live? The only alternative is repeating
@@ -143,7 +146,7 @@ domains, CHECK rules, composite keys, indexes, and each FK's ON DELETE action on
 
 - Full DDL with every constraint and its reasoning in the comments:
   [`schema/create_tables.sql`](../schema/create_tables.sql) — 9 tables, 10 foreign keys,
-  9 CHECK constraints, 7 unique keys, 3 supporting indexes (v2).
+  8 CHECK constraints, 7 unique keys, 3 supporting indexes, 2 triggers (v2.1).
 - Column-by-column descriptions + the FK / CHECK / UQ / index / ENUM catalogs:
   [`DATA_DICTIONARY.md`](./DATA_DICTIONARY.md)
 
@@ -223,8 +226,10 @@ The 6 RESTRICT / 3 CASCADE / 1 SET NULL split from §2 is not decoration; each r
 scenario behind it. Concretely: attempt `DELETE FROM accounts WHERE account_id = 1` while
 transactions exist → **ERROR 1451**, history protected. Delete a loan → its EMI schedule
 goes with it (CASCADE) — a schedule without its loan is noise. Delete a manager →
-subordinates' `manager_id` becomes NULL (SET NULL) — and `chk_emp_not_own_manager` keeps the
-reporting line from ever pointing at itself.
+subordinates' `manager_id` becomes NULL (SET NULL) — and the not-own-manager rule
+(`trg_emp_not_own_manager_*` since v2.1, a trigger pair because MySQL 8 refuses a CHECK
+on a foreign-key-referential-action column — see §7) keeps the reporting line from
+ever pointing at itself.
 
 The one-line summary I keep coming back to: **the ON DELETE action encodes who owns the
 data.** The bank owns its history (RESTRICT), a customer owns their convenience data
@@ -262,9 +267,11 @@ cannot rot.
   ENUM wins; I'm noting the trade-off because it's the first thing I'd revisit if the
   domain grew.
 - **MySQL 8.0.16+ as a hard floor.** Not a preference — a fact: before 8.0.16, MySQL parses
-  CHECK constraints and then *silently ignores* them. A schema whose 9 CHECKs might not
+  CHECK constraints and then *silently ignores* them. A schema whose 8 CHECKs might not
   fire is not a schema I can hand over. The floor guarantees every rule in this page is
-  actually enforced (violations fail with error 3819). InnoDB because it's the only engine
+  actually enforced (CHECK violations fail with error 3819; the one rule MySQL would not
+  accept as a CHECK lives in a trigger pair and fails with 1644 — see the v2.1 note in
+  §7). InnoDB because it's the only engine
   with real foreign keys and transactions; `utf8mb4` because it's actual 4-byte UTF-8 —
   customer names with any diacritic, and the ₹ symbol itself, must survive round-trips.
 - **`DATE` vs `DATETIME`.** Business dates (`dob`, `due_date`, `expiry_date`...) are day
@@ -321,9 +328,9 @@ fact is stored in exactly one table, there are no join dependencies to decompose
 holds for the same reason 3NF did: one home per fact.
 
 The full FD-by-FD walkthrough — including a worked 1NF → 2NF → 3NF → BCNF progression on a
-deliberately broken version of the design, and one BCNF decomposition exercise (a
-`loan_officer` attribute that would have created a non-key determinant) — is Chapter 7 of
-the print report.
+deliberately broken version of the design, the BCNF decomposition exercise that changed the
+schema, and the two deliberate deviations on record — is in
+[`NORMALIZATION.md`](./NORMALIZATION.md).
 
 ## 7 · How this design was verified
 
@@ -334,7 +341,7 @@ against the DDL, and the DDL itself was executed and probed:
   (`fk_accounts_customer` … `fk_card_account`).
 - ✓ **ON DELETE distribution matches the DDL: 6 RESTRICT · 3 CASCADE · 1 SET NULL.**
 - ✓ **Counts from `information_schema` after running the script:** 9 tables · 10 FK ·
-  9 CHECK · 7 UNIQUE · 3 secondary indexes · 57 columns.
+  8 CHECK · 7 UNIQUE · 3 secondary indexes · 2 triggers · 57 columns.
 - ✓ **Diagram ⇔ dictionary ⇔ DDL:** table list in §1 ⇔ cards on `relational_schema.png`
   ⇔ `CREATE TABLE` statements; `relational_schema_detailed.png` ⇔ `DATA_DICTIONARY.md`
   column-for-column.
@@ -343,12 +350,14 @@ against the DDL, and the DDL itself was executed and probed:
 - ✓ **No `FLOAT`/`DOUBLE` anywhere in the DDL**; every money column is `DECIMAL`.
 - ✓ **Transfer pairing enforced** by `chk_txn_transfer_pairing`; **no `is_overdue` column
   exists anywhere** — overdue is a query (D6).
-- ✓ **Negative tests:** each CHECK/FK rule was deliberately violated to confirm the engine
-  rejects it (errors 3819 for CHECKs, 1452/1451 for FKs in the two directions).
+- ✓ **Negative tests:** each CHECK/FK/trigger rule was deliberately violated to confirm the
+  engine rejects it (errors 3819 for CHECKs, 1644 for the trigger rule, 1452/1451 for FKs
+  in the two directions).
 
-**The v2 corrections — what review actually caught.** The first version of the DDL had two
-defects that only surfaced when the design was reviewed against real banking behaviour, and
-I think they're worth owning rather than hiding:
+**The corrections log — what review and implementation actually caught.** The first
+version of the DDL had two defects that only surfaced when the design was reviewed against
+real banking behaviour, and v2 itself had one more that only surfaced when it ran on a
+real server. All three are worth owning rather than hiding:
 
 1. **`chk_payment_dates` (`paid_date >= due_date`) was removed.** It sounds defensive but
    it rejects *early* EMI payments — paying an instalment before its due date is completely
@@ -358,6 +367,16 @@ I think they're worth owning rather than hiding:
    automatically for `fk_accounts_customer` — a duplicate index costs write throughput and
    buys nothing. The lesson generalised into the index policy in §5: never index FK columns
    explicitly.
+3. **`chk_emp_not_own_manager` became a trigger pair** (v2.1 — caught by Siva while bringing
+   the DDL up on MySQL, signed off after review). MySQL 8 refuses to create a CHECK on a
+   column that a foreign key referential action uses (`ERROR 3823` on `manager_id` /
+   `fk_emp_manager`), so the same rule now lives in `trg_emp_not_own_manager_ins` / `_upd`
+   (`SIGNAL SQLSTATE '45000'`, violation = error **1644**, rule name kept in the message).
+   Two properties I checked before signing off: the trigger condition is the exact logical
+   negation of the old CHECK (NULL-safe in both), and cascaded FK actions never fire
+   triggers — which is safe here, because the only cascade touching `manager_id` sets it
+   to NULL. The rule itself never changed; only the mechanism moved, and it stayed inside
+   the database.
 
 ## 8 · What's in this repository
 
@@ -365,10 +384,11 @@ I think they're worth owning rather than hiding:
 |---|---|
 | [`README.md`](../README.md) | project overview, how to run the DDL, reading order |
 | [`DATA_DICTIONARY.md`](./DATA_DICTIONARY.md) | column-by-column reference + FK / CHECK / UQ / index / ENUM catalogs |
+| [`NORMALIZATION.md`](./NORMALIZATION.md) | the full working: 1NF → BCNF progression, FD-by-FD proof for all 9 relations, 4NF/5NF, the two documented deviations |
 | [`diagrams/table_relationships.png`](../diagrams/table_relationships.png) | the hero map: all 9 tables and 10 links |
 | [`diagrams/er_diagram_chen.png`](../diagrams/er_diagram_chen.png) | ER in Chen's notation — the conceptual view, all 47 attributes |
 | [`diagrams/er_diagram.png`](../diagrams/er_diagram.png) | simplified ER (table names + PK/FK badges) |
 | [`diagrams/relational_schema.png`](../diagrams/relational_schema.png) | physical schema, all columns and FK arrows |
 | [`diagrams/relational_schema_detailed.png`](../diagrams/relational_schema_detailed.png) | column-level schema: 57 columns, defaults, ENUMs, CHECKs, ON DELETE chips |
 | [`diagrams/architecture_diagram.png`](../diagrams/architecture_diagram.png) | 5-layer system & database architecture (ANSI/SPARC mapping) |
-| [`schema/create_tables.sql`](../schema/create_tables.sql) | the DDL (v2) — the single source of truth |
+| [`schema/create_tables.sql`](../schema/create_tables.sql) | the DDL (v2.1) — the single source of truth |

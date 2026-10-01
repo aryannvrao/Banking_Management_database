@@ -33,7 +33,7 @@ GROUPBY,HAVINGCOUNT>1
 
 **Answer: 50 customers.** The seed registers 200 customers holding 250 accounts — 150 hold exactly one account, and the remaining 50 hold two. The query groups `accounts` by `customer_id` and keeps the groups with `HAVING COUNT(*) > 1`; the expected result grid is 50 rows of *(full name, accounts held = 2)*.
 
-### Perfect. Based on **your actual MySQL output**, write Q2 like this:
+
 
 ### Q2. Which branch manages the highest deposits? 
 JOIN,SUM,ORDERBY,LIMIT

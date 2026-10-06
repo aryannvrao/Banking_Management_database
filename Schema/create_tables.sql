@@ -4,7 +4,7 @@
 --  Target    : MySQL 8.0.16+ (InnoDB engine - required for FOREIGN KEY
 --              support; CHECK constraints are enforced only from 8.0.16)
 --  Team      : Team 3, DBMS Course Project, Atria University
---  Author    : Aryan Rao (AU25UG-006) - database design & DDL
+
 --  Purpose   : Creates the database, all 9 tables, integrity constraints,
 --              supporting indexes and 2 triggers, in dependency-safe order.
 --

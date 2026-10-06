@@ -10,7 +10,7 @@ FROM   customers c
 JOIN   accounts   a ON a.customer_id = c.customer_id
 GROUP  BY c.customer_id, c.full_name
 HAVING COUNT(a.account_id) > 1
-ORDER  BY account_count DESC, c.customer_id
+ORDER  BY account_count DESC, c.customer_id;
 
 
 
@@ -104,7 +104,6 @@ WHERE l.status = 'active';
 USE fincore;
 
 SELECT
-    SELECT 
     payment_id,
     loan_id,
     instalment_no,

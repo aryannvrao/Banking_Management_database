@@ -186,7 +186,7 @@ VALUES
 
 UPDATE employees
 SET manager_id = employee_id
-WHERE employee_id = 1003;
+WHERE employee_id = 3;
 
 
 -- ============================================================
